@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAT Directory & Space Simulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Desert Minimalist Theme */
+            --bg-sand: #F7F5F0;
+            --bg-sand-dark: #EAE6DF;
+            --text-charcoal: #333638;
+            --accent-terracotta: #D9735A;
+            --accent-terracotta-hover: #C56149;
+            --accent-gold: #E8A861;
+            --card-bg: #FFFFFF;
+            --border-light: #DCD8D0;
+            --success-green: #70995D;
+            --error-red: #C45557;
+            --font-main: 'Outfit', sans-serif;
+            --shadow-subtle: 0 4px 12px rgba(0,0,0,0.03);
+            --shadow-hover: 0 8px 24px rgba(0,0,0,0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-sand);
+            color: var(--text-charcoal);
+            line-height: 1.6;
+            padding: 3rem 2rem;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 760px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3.5rem;
+        }
+
+        h1 {
+            font-weight: 700;
+            font-size: 2.8rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-charcoal);
+            letter-spacing: -0.5px;
+        }
+
+        p.subtitle {
+            font-size: 1.15rem;
+            color: #666;
+            font-weight: 300;
+        }
+
+        /* Phases Container */
+        .phase-section {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-subtle);
+            border: 1px solid var(--border-light);
+            transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.3s;
+            opacity: 0.4;
+            pointer-events: none;
+            transform: scale(0.98);
+        }
+
+        .phase-section.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+            box-shadow: var(--shadow-hover);
+            border-left: 6px solid var(--accent-terracotta);
+        }
+        
+        .phase-section.completed {
+            opacity: 0.8;
+            pointer-events: none;
+            transform: scale(1);
+            border-left: 6px solid var(--success-green);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-charcoal);
+        }
+
+        .phase-badge {
+            background-color: var(--bg-sand-dark);
+            color: var(--text-charcoal);
+            padding: 0.25rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        p.instruction {
+            font-size: 1.05rem;
+            color: #555;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Phase 1: Directory */
+        .directory-card {
+            background-color: var(--bg-sand);
+            border: 2px dashed var(--border-light);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .directory-card:hover {
+            border-color: var(--accent-terracotta);
+            background-color: var(--bg-sand-dark);
+        }
+
+        .directory-card.revealed {
+            border-style: solid;
+            border-color: var(--accent-terracotta);
+            background-color: rgba(217, 115, 90, 0.05);
+            cursor: default;
+        }
+
+        .file-info {
+            font-size: 1.4rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .hidden-block {
+            margin-top: 1.2rem;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--accent-terracotta);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .hidden-block.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .hint-text {
+            font-size: 0.95rem;
+            color: #777;
+            margin-top: 0.8rem;
+            font-style: italic;
+        }
+
+        .explicit-highlight {
+            display: inline-block;
+            background-color: var(--accent-gold);
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        /* Phase 2: FAT Table */
+        .fat-table-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 1.2rem;
+            margin-top: 1.5rem;
+        }
+
+        .fat-row {
+            background-color: var(--bg-sand);
+            border: 2px solid var(--border-light);
+            border-radius: 10px;
+            padding: 1.2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .fat-row:hover:not(.disabled) {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--accent-gold);
+        }
+
+        .fat-row.disabled {
+            cursor: not-allowed;
+        }
+
+        /* Highlighting the active block in the chain */
+        .fat-row.active-highlight {
+            border: 2px solid var(--accent-terracotta);
+            background-color: #fff;
+            box-shadow: var(--shadow-hover);
+            transform: scale(1.05);
+            z-index: 2;
+        }
+
+        /* Blocks already traced */
+        .fat-row.visited {
+            background-color: var(--bg-sand-dark);
+            border-color: var(--border-light);
+            color: #888;
+            transform: scale(0.98);
+        }
+        
+        .fat-row.visited .fat-pointer {
+            color: #888;
+        }
+
+        .fat-block {
+            font-size: 0.9rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        .fat-pointer {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-charcoal);
+        }
+
+        .eof-message {
+            margin-top: 2rem;
+            padding: 1.2rem;
+            background-color: rgba(112, 153, 93, 0.1);
+            color: var(--success-green);
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: none;
+            border: 1px solid rgba(112, 153, 93, 0.3);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Phase 3: Calculator */
+        .calculator-area {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .calc-question {
+            font-size: 1.15rem;
+            font-weight: 500;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        input[type="number"] {
+            padding: 0.8rem 1.2rem;
+            border: 2px solid var(--border-light);
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-family: var(--font-main);
+            width: 160px;
+            outline: none;
+            transition: all 0.2s;
+            background-color: var(--bg-sand);
+        }
+
+        input[type="number"]:focus {
+            border-color: var(--accent-terracotta);
+            background-color: #fff;
+            box-shadow: 0 0 0 4px rgba(217, 115, 90, 0.1);
+        }
+
+        button {
+            background-color: var(--accent-terracotta);
+            color: white;
+            border: none;
+            padding: 0.85rem 1.8rem;
+            border-radius: 8px;
+            font-size: 1.05rem;
+            font-family: var(--font-main);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        button:hover:not(:disabled) {
+            background-color: var(--accent-terracotta-hover);
+            transform: translateY(-1px);
+        }
+        
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .feedback {
+            padding: 1.2rem;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+            display: none;
+            font-size: 1.05rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .feedback.success {
+            display: block;
+            background-color: rgba(112, 153, 93, 0.1);
+            color: var(--success-green);
+            border: 1px solid rgba(112, 153, 93, 0.3);
+        }
+
+        .feedback.error {
+            display: block;
+            background-color: rgba(196, 85, 87, 0.08);
+            color: var(--error-red);
+            border: 1px solid rgba(196, 85, 87, 0.2);
+        }
+        
+        .reset-btn {
+            display: block;
+            margin: 3rem auto;
+            background-color: transparent;
+            color: var(--text-charcoal);
+            border: 2px solid var(--border-light);
+        }
+        .reset-btn:hover {
+            background-color: var(--bg-sand-dark);
+            border-color: var(--text-charcoal);
+        }
+        
+        .icon {
+            font-size: 1.3em;
+        }
+
+        .back-link {
+            position: absolute;
+            top: 1.5rem;
+            left: 1.5rem;
+            color: var(--text-charcoal);
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            opacity: 0.6;
+            transition: all 0.2s;
+        }
+
+        .back-link:hover {
+            opacity: 1;
+            transform: translateX(-3px);
+        }
+
+        .back-link svg {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        Back to OS Visualizer
+    </a>
+    <div class="container">
+        <header>
+            <h1>FAT Simulator</h1>
+            <p class="subtitle">Understand directory entries and calculate allocated disk space.</p>
+        </header>
+
+        <!-- Phase 1 -->
+        <section id="phase1" class="phase-section active">
+            <h2><span class="phase-badge">Phase 1</span> Directory Entry Discovery</h2>
+            <p class="instruction">To read a file, the OS first looks it up in the directory to find its starting point.<br>
+            <strong>Click the Directory Registry card below</strong> to reveal the file's first block.</p>
+            
+            <div id="dir-card" class="directory-card" onclick="revealStartBlock()">
+                <div class="file-info"><span class="icon">📄</span> dataset.csv</div>
+                <div class="hint-text">Click to read directory entry</div>
+                <div id="start-block-display" class="hidden-block">
+                    First Block Number = <span class="explicit-highlight" id="first-block-num"></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Phase 2 -->
+        <section id="phase2" class="phase-section">
+            <h2><span class="phase-badge">Phase 2</span> Tracing the Chain</h2>
+            <p class="instruction">The File Allocation Table (FAT) stores pointers to the next block in the file. <br>
+            The starting block is highlighted. <strong>Find and click the next block indicated by its pointer</strong> until you reach <span style="font-weight: 700; color: var(--error-red)">-1</span> (End of File).</p>
+            
+            <div id="fat-table" class="fat-table-container">
+                <!-- Dynamically generated -->
+            </div>
+            
+            <div id="eof-message" class="eof-message">
+                🎉 End of File (EOF) Reached! You successfully traced the entire file sequence.
+            </div>
+        </section>
+
+        <!-- Phase 3 -->
+        <section id="phase3" class="phase-section">
+            <h2><span class="phase-badge">Phase 3</span> Space Allocation Calculator</h2>
+            <div class="calculator-area">
+                <p class="calc-question" id="calc-prompt">The file spans X blocks. If 1 block = 4KB, what is the total allocated space in KB?</p>
+                <div class="input-group">
+                    <input type="number" id="calc-input" placeholder="Total KB" />
+                    <button id="calc-submit" onclick="checkCalculation()">Submit</button>
+                </div>
+                <div id="calc-feedback" class="feedback"></div>
+            </div>
+        </section>
+        
+        <button class="reset-btn" onclick="initSimulation()">Restart Simulator</button>
+    </div>
+
+    <script>
+        // State variables
+        let fat = {};
+        let startBlock = 0;
+        let blockCount = 0;
+        let currentTargetBlock = 0;
+        let currentActiveBlock = 0;
+        const BLOCK_SIZE_KB = 4;
+        
+        function initSimulation() {
+            // Reset UI
+            document.getElementById('phase1').className = 'phase-section active';
+            document.getElementById('phase2').className = 'phase-section';
+            document.getElementById('phase3').className = 'phase-section';
+            
+            const dirCard = document.getElementById('dir-card');
+            dirCard.classList.remove('revealed');
+            dirCard.querySelector('.hint-text').style.display = 'block';
+            document.getElementById('start-block-display').classList.remove('show');
+            
+            document.getElementById('fat-table').innerHTML = '';
+            document.getElementById('eof-message').style.display = 'none';
+            
+            document.getElementById('calc-input').value = '';
+            document.getElementById('calc-input').disabled = false;
+            document.getElementById('calc-submit').disabled = false;
+            document.getElementById('calc-feedback').className = 'feedback';
+            document.getElementById('calc-feedback').style.display = 'none';
+            
+            generateFATState();
+        }
+
+        function generateFATState() {
+            // Randomly decide if file is 3 or 4 blocks long
+            blockCount = Math.floor(Math.random() * 2) + 3; // 3 or 4
+            
+            // Pick random blocks between 100 and 115 to keep the table scannable
+            let availableBlocks = [];
+            for (let i = 100; i <= 111; i++) {
+                availableBlocks.push(i);
+            }
+            
+            // Shuffle available blocks
+            availableBlocks.sort(() => 0.5 - Math.random());
+            
+            // Select our file sequence blocks
+            const fileBlocks = availableBlocks.slice(0, blockCount);
+            startBlock = fileBlocks[0];
+            
+            fat = {};
+            // Generate some random noise in the FAT table for the remaining blocks
+            const noiseBlocks = availableBlocks.slice(blockCount, blockCount + 6);
+            noiseBlocks.forEach(b => {
+                // Point noise to some random block
+                fat[b] = availableBlocks[Math.floor(Math.random() * availableBlocks.length)];
+            });
+            
+            // Link the file blocks sequentially
+            for (let i = 0; i < blockCount; i++) {
+                if (i === blockCount - 1) {
+                    fat[fileBlocks[i]] = -1; // End of File
+                } else {
+                    fat[fileBlocks[i]] = fileBlocks[i + 1];
+                }
+            }
+            
+            // Generate FAT table array for UI (mixing file blocks and noise blocks)
+            let displayBlocks = [...fileBlocks, ...noiseBlocks].sort((a, b) => a - b);
+            
+            const fatTable = document.getElementById('fat-table');
+            displayBlocks.forEach(block => {
+                const row = document.createElement('div');
+                row.className = 'fat-row disabled';
+                row.id = `block-${block}`;
+                row.innerHTML = `
+                    <div class="fat-block">Block ${block}</div>
+                    <div class="fat-pointer">${fat[block]}</div>
+                `;
+                row.onclick = () => handleBlockClick(block);
+                fatTable.appendChild(row);
+            });
+            
+            document.getElementById('first-block-num').textContent = startBlock;
+        }
+
+        function revealStartBlock() {
+            const card = document.getElementById('dir-card');
+            if (card.classList.contains('revealed')) return;
+            
+            card.classList.add('revealed');
+            card.querySelector('.hint-text').style.display = 'none';
+            document.getElementById('start-block-display').classList.add('show');
+            
+            // Smooth transition to Phase 2
+            setTimeout(() => {
+                document.getElementById('phase1').classList.add('completed');
+                document.getElementById('phase1').classList.remove('active');
+                document.getElementById('phase2').classList.add('active');
+                
+                // Highlight starting block in FAT table
+                const startRow = document.getElementById(`block-${startBlock}`);
+                startRow.classList.remove('disabled');
+                startRow.classList.add('active-highlight');
+                
+                currentActiveBlock = startBlock;
+                currentTargetBlock = fat[startBlock];
+                
+                // Enable all blocks for clicking, but we only accept the correct one
+                const allRows = document.querySelectorAll('.fat-row');
+                allRows.forEach(r => {
+                    r.classList.remove('disabled');
+                });
+                
+            }, 1000);
+        }
+        
+        function handleBlockClick(block) {
+            const phase2 = document.getElementById('phase2');
+            if (!phase2.classList.contains('active')) return;
+            
+            // Ignore clicks on already visited blocks or the currently active block
+            const row = document.getElementById(`block-${block}`);
+            if (row.classList.contains('visited') || block === currentActiveBlock) return;
+            
+            // Verify if user clicked the correct next block in the chain
+            if (block !== currentTargetBlock) {
+                // Visual feedback for wrong click
+                row.style.animation = 'shake 0.4s';
+                setTimeout(() => row.style.animation = '', 400);
+                return;
+            }
+            
+            // Correct click! Mark previous active block as visited
+            const prevRow = document.getElementById(`block-${currentActiveBlock}`);
+            prevRow.classList.remove('active-highlight');
+            prevRow.classList.add('visited');
+            
+            // Set new active block
+            currentActiveBlock = block;
+            row.classList.add('active-highlight');
+            
+            const pointer = fat[block];
+            
+            if (pointer === -1) {
+                // End of File Reached
+                document.getElementById('eof-message').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('phase2').classList.add('completed');
+                    document.getElementById('phase2').classList.remove('active');
+                    startPhase3();
+                }, 1800);
+            } else {
+                // Update target to next pointer
+                currentTargetBlock = pointer;
+            }
+        }
+        
+        function startPhase3() {
+            document.getElementById('phase3').classList.add('active');
+            document.getElementById('calc-prompt').innerHTML = 
+                `The file spans <strong>${blockCount} blocks</strong>. If 1 block = <strong>${BLOCK_SIZE_KB}KB</strong>, what is the total allocated space in KB?`;
+            
+            document.getElementById('calc-input').focus();
+        }
+        
+        function checkCalculation() {
+            const input = document.getElementById('calc-input').value;
+            const feedback = document.getElementById('calc-feedback');
+            
+            if (!input) {
+                feedback.className = 'feedback error';
+                feedback.innerHTML = '⚠️ Please enter a number.';
+                feedback.style.display = 'block';
+                return;
+            }
+            
+            const parsed = parseInt(input);
+            const expected = blockCount * BLOCK_SIZE_KB;
+            
+            if (parsed === expected) {
+                feedback.className = 'feedback success';
+                feedback.innerHTML = `<strong>✨ Correct!</strong> ${blockCount} blocks × ${BLOCK_SIZE_KB}KB = ${expected}KB total allocated space.`;
+                feedback.style.display = 'block';
+                document.getElementById('calc-input').disabled = true;
+                document.getElementById('calc-submit').disabled = true;
+                document.getElementById('phase3').classList.add('completed');
+            } else {
+                feedback.className = 'feedback error';
+                feedback.innerHTML = `<strong>Not quite.</strong><br>Mathematical breakdown: The file spans ${blockCount} blocks. Each block is ${BLOCK_SIZE_KB}KB. Try multiplying ${blockCount} by ${BLOCK_SIZE_KB}.`;
+                feedback.style.display = 'block';
+            }
+        }
+        
+        // Add shake animation keyframes dynamically
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes shake {
+                0% { transform: translateX(0); }
+                25% { transform: translateX(-5px); border-color: var(--error-red); }
+                50% { transform: translateX(5px); border-color: var(--error-red); }
+                75% { transform: translateX(-5px); border-color: var(--error-red); }
+                100% { transform: translateX(0); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Initialize on load
+        window.onload = initSimulation;
+    </script>
+</body>
+</html>

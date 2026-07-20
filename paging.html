@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paging Simulator</title>
+    <!-- We will use standard CSS variables for the Desert Minimalist theme -->
+    <style>
+        :root {
+            --color-bg-primary: #050505;
+            --color-bg-secondary: #111111;
+            --color-bg-tertiary: #0a0a0a;
+            --color-accent-primary: #00f0ff;
+            --color-accent-secondary: #0090ff;
+            --color-text-primary: #ffffff;
+            --color-text-secondary: #aaaaaa;
+            --color-border: #333333;
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 240, 255, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 240, 255, 0.2), 0 2px 4px -1px rgba(0, 240, 255, 0.1);
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-full: 9999px;
+        }
+
+        .back-home-btn {
+            display: inline-block;
+            color: var(--color-accent-primary);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            background: rgba(0, 240, 255, 0.05);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
+        }
+
+        .back-home-btn:hover {
+            background: rgba(0, 240, 255, 0.15);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+            text-shadow: 0 0 8px var(--color-accent-primary);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: var(--color-bg-tertiary);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+        
+        .nav-brand {
+            font-weight: 600;
+            color: var(--color-accent-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links { display: flex; gap: 1.5rem; }
+        .nav-link {
+            text-decoration: none;
+            color: var(--color-text-secondary);
+            font-weight: 500;
+            transition: color 0.2s ease;
+            padding: 0.5rem 0;
+            position: relative;
+        }
+        .nav-link:hover, .nav-link.active { color: var(--color-accent-primary); }
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 2px;
+            background-color: var(--color-accent-primary);
+        }
+
+        /* Views */
+        .view { display: none; flex: 1; }
+        .view.active { display: flex; flex-direction: column; }
+
+        /* Calculator Layout */
+        .container {
+            width: 100%; max-width: 1200px;
+            margin: 0 auto; padding: 2rem 1.5rem;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        @media (min-width: 768px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+        
+        .card {
+            background-color: var(--color-bg-tertiary);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--color-border);
+        }
+
+        h2 { margin-bottom: 0.5rem; }
+        p { color: var(--color-text-secondary); margin-bottom: 1rem; }
+        
+        .input-group { display: flex; flex-direction: column; margin-bottom: 1.5rem; }
+        .input-label { font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; }
+        .input-field {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+        }
+        .input-field:focus { outline: none; border-color: var(--color-accent-primary); }
+
+        .result-box {
+            margin-top: 1.5rem; padding: 1.5rem;
+            background-color: var(--color-bg-secondary);
+            border-radius: var(--radius-md);
+        }
+
+        .split-box {
+            display: flex; gap: 1rem; margin-top: 1rem;
+        }
+        .split-item {
+            flex: 1; padding: 1rem; text-align: center;
+            border-radius: var(--radius-md);
+        }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.5rem; text-align: left; border-bottom: 1px solid var(--color-border); }
+        .active-row { background-color: var(--color-bg-secondary); font-weight: bold; }
+
+        /* Animation Canvas */
+        #animation-canvas {
+            width: 100%; height: calc(100vh - 65px);
+            display: block;
+        }
+        .overlay-text {
+            position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+            background: rgba(255,255,255,0.8);
+            padding: 1rem 2rem; border-radius: var(--radius-full);
+            box-shadow: var(--shadow-md); text-align: center;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Controls -->
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; border-bottom: 1px solid var(--color-border); background: var(--color-bg-tertiary); z-index: 10;">
+        <a href="index.html" class="back-home-btn" style="margin: 0;">← Back to Home</a>
+        <div class="nav-links">
+            <a href="#calculator" class="nav-link" id="link-calculator">Calculator & Translation</a>
+            <a href="#animation" class="nav-link" id="link-animation">Access Animation</a>
+        </div>
+    </div>
+
+    <!-- Route: /calculator -->
+    <main class="view" id="view-calculator">
+        <div class="container">
+            <h1 style="text-align: center; margin-bottom: 2rem; color: var(--color-accent-primary);">Paging Calculator & Translation</h1>
+            
+            <div class="grid-2">
+                <!-- Calculation Module -->
+                <div class="card">
+                    <h2>Calculation Module</h2>
+                    <p>Calculate Page Number ($p$) and Offset ($d$) bits.</p>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Logical Address Space ($m$ bits)</label>
+                        <input type="number" class="input-field" id="input-m" value="32" min="1">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Page Size (bytes)</label>
+                        <select class="input-field" id="input-pagesize">
+                            <option value="1024">1 KB</option>
+                            <option value="4096" selected>4 KB</option>
+                            <option value="1048576">1 MB</option>
+                            <option value="2097152">2 MB</option>
+                        </select>
+                    </div>
+                    
+                    <div class="result-box">
+                        <h3>Results</h3>
+                        <div style="margin-top: 1rem;">
+                            <div><strong>Page Offset ($d$):</strong> <span id="res-d">12</span> bits</div>
+                            <div><strong>Page Number ($p$):</strong> <span id="res-p">20</span> bits</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Translation Module -->
+                <div class="card">
+                    <h2>Translation Module</h2>
+                    <p>Translate a decimal logical address to physical.</p>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Logical Address (Decimal)</label>
+                        <input type="number" class="input-field" id="input-logical" value="8500" min="0">
+                    </div>
+                    
+                    <h3 style="margin-top: 1.5rem;">1. Address Split</h3>
+                    <div class="split-box">
+                        <div class="split-item" style="background-color: #111; border: 1px solid var(--color-accent-secondary); box-shadow: 0 0 10px rgba(0,240,255,0.2);">
+                            <div style="font-size: 1.25rem; font-weight: bold; color: var(--color-accent-primary); text-shadow: 0 0 8px var(--color-accent-primary);" id="split-p">2</div>
+                            <div style="font-size: 0.875rem; color: #aaa;">Page Number ($p$)</div>
+                        </div>
+                        <div class="split-item" style="background-color: #111; border: 1px solid var(--color-accent-primary); box-shadow: 0 0 10px rgba(0,240,255,0.2);">
+                            <div style="font-size: 1.25rem; font-weight: bold; color: var(--color-accent-primary); text-shadow: 0 0 8px var(--color-accent-primary);" id="split-d">308</div>
+                            <div style="font-size: 0.875rem; color: #aaa;">Offset ($d$)</div>
+                        </div>
+                    </div>
+                    
+                    <h3 style="margin-top: 1.5rem;">2. Page Table Lookup</h3>
+                    <div style="margin-top: 1rem; border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden;">
+                        <table id="page-table">
+                            <thead>
+                                <tr style="background: var(--color-bg-primary);">
+                                    <th>Page Number</th>
+                                    <th>Frame Number</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Generated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 style="margin-top: 1.5rem;">3. Physical Address Resolution</h3>
+                    <div id="physical-result" style="padding: 1rem; background-color: var(--color-accent-primary); color: white; border-radius: var(--radius-md); margin-top: 1rem; text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: bold;" id="res-physical">33076</div>
+                        <div style="font-size: 0.875rem; opacity: 0.9;" id="res-formula">(Frame 8 × 4096) + 308</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Route: /animation -->
+    <main class="view" id="view-animation" style="position: relative;">
+        <canvas id="animation-canvas"></canvas>
+        <div class="overlay-text">
+            <h3 style="margin: 0; color: var(--color-text-primary);">Hardware Access Method</h3>
+            <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem;">CPU &rarr; MMU &rarr; Physical RAM</p>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // --- ROUTING LOGIC ---
+        const views = {
+            '#calculator': document.getElementById('view-calculator'),
+            '#animation': document.getElementById('view-animation')
+        };
+        const links = {
+            '#calculator': document.getElementById('link-calculator'),
+            '#animation': document.getElementById('link-animation')
+        };
+
+        let animationInitialized = false;
+
+        function handleRoute() {
+            let hash = window.location.hash;
+            if (!views[hash]) hash = '#calculator'; // Default route
+
+            // Update DOM visibility
+            Object.keys(views).forEach(k => views[k].classList.remove('active'));
+            Object.keys(links).forEach(k => links[k].classList.remove('active'));
+            
+            views[hash].classList.add('active');
+            links[hash].classList.add('active');
+
+            // Initialize ThreeJS only when needed
+            if (hash === '#animation' && !animationInitialized) {
+                initThreeJS();
+                animationInitialized = true;
+            }
+        }
+
+        window.addEventListener('hashchange', handleRoute);
+        window.addEventListener('load', handleRoute);
+
+        // --- CALCULATOR LOGIC ---
+        const dom = {
+            m: document.getElementById('input-m'),
+            size: document.getElementById('input-pagesize'),
+            logical: document.getElementById('input-logical'),
+            resD: document.getElementById('res-d'),
+            resP: document.getElementById('res-p'),
+            splitP: document.getElementById('split-p'),
+            splitD: document.getElementById('split-d'),
+            ptable: document.querySelector('#page-table tbody'),
+            resPhys: document.getElementById('res-physical'),
+            resForm: document.getElementById('res-formula'),
+            resBox: document.getElementById('physical-result')
+        };
+
+        const pageTableMock = { 0: 5, 1: 2, 2: 8, 3: 1, 4: 10 };
+
+        function updateCalculator() {
+            const m = parseInt(dom.m.value, 10) || 32;
+            const pageSize = parseInt(dom.size.value, 10) || 4096;
+            const logicalAddress = parseInt(dom.logical.value, 10) || 0;
+
+            // 1. Calculate Bits
+            const dBits = Math.log2(pageSize);
+            const pBits = Math.max(0, m - dBits);
+            
+            dom.resD.textContent = dBits;
+            dom.resP.textContent = pBits;
+
+            // 2. Address Split (Safe integer math)
+            const pNum = Math.floor(logicalAddress / pageSize);
+            const dOffset = logicalAddress % pageSize;
+
+            dom.splitP.textContent = pNum;
+            dom.splitD.textContent = dOffset;
+
+            // 3. Render Page Table
+            dom.ptable.innerHTML = '';
+            for (let i = 0; i <= Math.max(4, pNum); i++) {
+                if (i > 4 && i !== pNum) continue; // Skip large gaps
+                
+                const frame = pageTableMock[i] !== undefined ? pageTableMock[i] : 'Fault';
+                const isActive = (i === pNum);
+                
+                const tr = document.createElement('tr');
+                if (isActive) tr.className = 'active-row';
+                
+                tr.innerHTML = `
+                    <td>${i}</td>
+                    <td style="color: ${frame === 'Fault' ? 'red' : 'inherit'}">${frame}</td>
+                `;
+                dom.ptable.appendChild(tr);
+            }
+
+            // 4. Resolve Physical Address
+            const frame = pageTableMock[pNum];
+            if (frame !== undefined) {
+                const physAddr = (frame * pageSize) + dOffset;
+                dom.resPhys.textContent = physAddr;
+                dom.resForm.textContent = `(Frame ${frame} × ${pageSize}) + ${dOffset}`;
+                dom.resBox.style.backgroundColor = 'var(--color-accent-primary)';
+            } else {
+                dom.resPhys.textContent = "PAGE FAULT";
+                dom.resForm.textContent = "Page not loaded in RAM";
+                dom.resBox.style.backgroundColor = '#5D5A56'; // Muted
+            }
+        }
+
+        dom.m.addEventListener('input', updateCalculator);
+        dom.size.addEventListener('change', updateCalculator);
+        dom.logical.addEventListener('input', updateCalculator);
+        
+        // Initial run
+        updateCalculator();
+
+
+        // --- THREE.JS ANIMATION LOGIC ---
+        function initThreeJS() {
+            const canvas = document.getElementById('animation-canvas');
+            const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+            renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+
+            const scene = new THREE.Scene();
+            
+            const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 100);
+            camera.position.set(0, 5, 12);
+            camera.lookAt(0, 0, 0);
+
+            // Lights
+            const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambient);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(10, 10, 5);
+            scene.add(dirLight);
+
+            // Helpers: Create Hardware Blocks
+            function createBlock(x, colorHex) {
+                const geo = new THREE.BoxGeometry(2, 2, 2);
+                const mat = new THREE.MeshStandardMaterial({ 
+                    color: colorHex, 
+                    transparent: true, 
+                    opacity: 0.9 
+                });
+                const mesh = new THREE.Mesh(geo, mat);
+                mesh.position.set(x, 0, 0);
+                return mesh;
+            }
+
+            // CPU, MMU, RAM
+            const cpu = createBlock(-4, 0x111111); // Dark Gray
+            const mmu = createBlock(0, 0x222222);  // Lighter Gray
+            const ram = createBlock(4, 0x111111);  // Dark Gray
+            scene.add(cpu, mmu, ram);
+
+            // Particles (Instanced Mesh)
+            const particleCount = 60;
+            const pGeo = new THREE.SphereGeometry(0.1, 16, 16);
+            const pMat = new THREE.MeshStandardMaterial();
+            const particles = new THREE.InstancedMesh(pGeo, pMat, particleCount);
+            scene.add(particles);
+
+            const dummy = new THREE.Object3D();
+            const pData = [];
+            for (let i = 0; i < particleCount; i++) {
+                pData.push({
+                    t: Math.random(),
+                    speed: 0.003 + Math.random() * 0.003
+                });
+            }
+
+            const colorLogical = new THREE.Color(0x00f0ff); // Neon Blue
+            const colorPhysical = new THREE.Color(0x0090ff); // Deep Neon Blue
+
+            function animate() {
+                requestAnimationFrame(animate);
+
+                // Update particles
+                for (let i = 0; i < particleCount; i++) {
+                    let p = pData[i];
+                    p.t += p.speed;
+                    if (p.t > 1) p.t = 0;
+
+                    let x, y, z = 0;
+                    if (p.t < 0.5) {
+                        // CPU -> MMU
+                        let localT = p.t * 2;
+                        x = -4 + (4 * localT);
+                        y = Math.sin(localT * Math.PI) * 0.5; // arc
+                        particles.setColorAt(i, colorLogical);
+                    } else {
+                        // MMU -> RAM
+                        let localT = (p.t - 0.5) * 2;
+                        x = 0 + (4 * localT);
+                        y = Math.sin(localT * Math.PI) * 0.5;
+                        particles.setColorAt(i, colorPhysical);
+                    }
+                    
+                    dummy.position.set(x, y, z);
+                    dummy.updateMatrix();
+                    particles.setMatrixAt(i, dummy.matrix);
+                }
+                
+                particles.instanceMatrix.needsUpdate = true;
+                if (particles.instanceColor) particles.instanceColor.needsUpdate = true;
+
+                // Subtle floating for blocks
+                const time = Date.now() * 0.001;
+                cpu.position.y = Math.sin(time) * 0.1;
+                mmu.position.y = Math.sin(time + 2) * 0.1;
+                ram.position.y = Math.sin(time + 4) * 0.1;
+
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            // Handle Resize
+            window.addEventListener('resize', () => {
+                if(views['#animation'].classList.contains('active')) {
+                    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

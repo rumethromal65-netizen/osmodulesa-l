@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OS Memorizer</title>
+    <style>
+        :root {
+            --color-bg-primary: #F4F1ED; /* Sand */
+            --color-bg-secondary: #E8ECE1; /* Pale Sage */
+            --color-bg-tertiary: #FFFFFF; /* Pure White */
+            --color-accent-primary: #C86F58; /* Terracotta */
+            --color-accent-secondary: #B57A60; /* Warm Clay */
+            --color-text-primary: #2C2B29; /* Deep Charcoal */
+            --color-text-secondary: #5D5A56; /* Muted Charcoal */
+            --color-border: #D8D4CE; /* Soft Sand Border */
+            
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            --radius-md: 0.5rem;
+            --radius-lg: 1rem;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: var(--color-bg-tertiary);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-brand {
+            font-weight: 600;
+            color: var(--color-accent-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Header & Controls */
+        .header { text-align: center; margin-bottom: 2rem; width: 100%; }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            width: 100%;
+            background: var(--color-bg-tertiary);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-md);
+        }
+
+        select, button {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            background: var(--color-bg-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        button:hover { background: var(--color-bg-secondary); }
+        button.primary { background: var(--color-accent-primary); color: white; border: none; }
+        button.primary:hover { background: var(--color-accent-secondary); }
+
+        /* Flashcard Scene */
+        .scene {
+            width: 100%;
+            height: 400px;
+            perspective: 1000px;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .card.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            background: var(--color-bg-tertiary);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--color-border);
+            text-align: center;
+        }
+
+        .card-front {
+            /* Front side styling */
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            background: var(--color-bg-secondary);
+            border-color: #94a37a;
+        }
+
+        .module-badge {
+            position: absolute;
+            top: 1.5rem;
+            font-size: 0.875rem;
+            color: var(--color-accent-primary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-text {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: var(--color-text-primary);
+            line-height: 1.4;
+        }
+
+        .card-back .card-text {
+            font-size: 1.25rem;
+            color: #4a543b; /* Darker sage text */
+        }
+
+        .instruction {
+            position: absolute;
+            bottom: 1.5rem;
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+            opacity: 0.7;
+        }
+
+        /* Progress & Action Buttons */
+        .actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .progress {
+            font-weight: 600;
+            color: var(--color-text-secondary);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <a href="index.html" class="nav-brand">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+            OS Visualizer
+        </a>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1 style="color: var(--color-accent-primary);">OS Memorizer</h1>
+            <p>Active Recall Flashcards for Operating Systems</p>
+        </div>
+
+        <div class="controls">
+            <select id="module-filter">
+                <option value="All">All Modules</option>
+                <option value="Module 1: Intro to Operating Systems">Module 1: Intro</option>
+                <option value="Module 2: File Management">Module 2: File Management</option>
+                <option value="Module 3: Process Management">Module 3: Process Management</option>
+                <option value="Module 4: Resource & Memory Management">Module 4: Memory</option>
+                <option value="Module 5: Device Management">Module 5: Device</option>
+            </select>
+            <button id="shuffle-btn">Shuffle Deck</button>
+        </div>
+
+        <div class="scene">
+            <div class="card" id="flashcard">
+                <div class="card-face card-front">
+                    <div class="module-badge" id="front-module">Module</div>
+                    <div class="card-text" id="front-text">Question goes here</div>
+                    <div class="instruction">Click to flip</div>
+                </div>
+                <div class="card-face card-back">
+                    <div class="module-badge" id="back-module">Module</div>
+                    <div class="card-text" id="back-text">Answer goes here</div>
+                    <div class="instruction">Click to flip back</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button id="prev-btn">&larr; Previous</button>
+            <div class="progress" id="progress-text">1 / 10</div>
+            <button id="next-btn" class="primary">Next &rarr;</button>
+        </div>
+    </div>
+
+    <script>
+        const flashcards = [
+            // Module 1
+            { module: "Module 1: Intro to Operating Systems", front: "Define an Operating System and its core purpose.", back: "An OS is system software that acts as an intermediary between the user and hardware. Its core purpose is to manage computer resources efficiently and provide a convenient environment to execute programs." },
+            { module: "Module 1: Intro to Operating Systems", front: "List examples of Desktop and Mobile OSes.", back: "Desktop: Windows, macOS, Linux, ChromeOS. Mobile: Android, iOS." },
+            { module: "Module 1: Intro to Operating Systems", front: "Describe the OS Evolution phases.", back: "1. No OS (direct hardware coding).\n2. Simple Batch (sequential job execution).\n3. Multi-Programmed batch (keeps CPU busy by loading multiple jobs into RAM)." },
+            { module: "Module 1: Intro to Operating Systems", front: "Outline the Boot Sequence.", back: "1. BIOS/UEFI initializes hardware.\n2. POST (Power-On Self Test) checks hardware health.\n3. Boot Loader/MBR finds and loads the OS Kernel into RAM." },
+            { module: "Module 1: Intro to Operating Systems", front: "Differentiate OS Classifications.", back: "Single/Single: One user, one app (MS-DOS).\nSingle/Multi: One user, many apps (Windows 10).\nMulti/Multi: Many users, many apps (Linux Server).\nReal-Time: Guaranteed strict response times (Airbags)." },
+            { module: "Module 1: Intro to Operating Systems", front: "Compare CLI vs. GUI.", back: "CLI (Command Line Interface): Text-based, fast, scriptable, steep learning curve.\nGUI (Graphical User Interface): Visual (icons/windows), intuitive, higher resource consumption." },
+            { module: "Module 1: Intro to Operating Systems", front: "Define Batch Processing and provide an example.", back: "Executing a series of non-interactive jobs without user intervention. Example: Generating monthly electricity bills." },
+            { module: "Module 1: Intro to Operating Systems", front: "Define Real-Time Processing and provide an example.", back: "Data processing that appears to take place instantly upon data entry. Example: ATM withdrawals, instantly updating stock balances after a transaction." },
+            { module: "Module 1: Intro to Operating Systems", front: "What is the role of System Software regarding peripheral devices?", back: "It manages hardware and supports data communication between the computer and peripheral devices." },
+            
+            // Module 2
+            { module: "Module 2: File Management", front: "Define a File and differentiate between Physical and Logical View.", back: "A file is a named collection of related data. Physical view refers to actual block locations on the disk, while Logical view is how the user sees the data (as a continuous stream)." },
+            { module: "Module 2: File Management", front: "Compare Sequential Access vs. Random/Direct Access.", back: "Sequential: Data is read strictly in order from beginning to end (e.g., magnetic tape). Random: Data can be accessed in any order instantly (e.g., HDD, SSD)." },
+            { module: "Module 2: File Management", front: "List File Security methods.", back: "Passwords (requires secret key), Attributes (Read-only, Hidden), and Access Control Lists (ACLs - granular permissions per user/group)." },
+            { module: "Module 2: File Management", front: "Identify Directory Structures.", back: "Single-level (one master list), Two-level (one directory per user), Tree structure (nested folders/subdirectories, the standard modern approach)." },
+            { module: "Module 2: File Management", front: "Define an FCB and its metadata.", back: "File Control Block (FCB) is a data structure storing file metadata: Name, Size, Location, Dates (creation/modified), and Permissions." },
+            { module: "Module 2: File Management", front: "Explain Contiguous Allocation and its types.", back: "Files are stored in contiguous sequential blocks. Types:\nFirst-Fit: First available gap.\nBest-Fit: Smallest gap that fits.\nWorst-Fit: Largest available gap." },
+            { module: "Module 2: File Management", front: "Explain Linked List and Indexed Allocation.", back: "Linked List: Each block contains a pointer to the next block (slow random access). Indexed: A central 'index block' stores pointers to all scattered data blocks." },
+            { module: "Module 2: File Management", front: "Differentiate Internal vs. External Fragmentation.", back: "Internal: Wasted space inside an allocated block (block is bigger than requested data). External: Wasted space between allocated blocks (free space is too fragmented to use)." },
+            { module: "Module 2: File Management", front: "Define Defragmentation and Compaction.", back: "Defragmentation moves scattered file blocks into contiguous spaces on disk. Compaction shifts memory contents to eliminate external fragmentation gaps." },
+            { module: "Module 2: File Management", front: "Compare FAT vs. NTFS.", back: "FAT (File Allocation Table): Older, simpler, wide compatibility, 4GB file limit (FAT32). NTFS (New Technology File System): Modern Windows, supports ACLs, encryption, journaling, huge files." },
+            { module: "Module 2: File Management", front: "In a FAT system, what does the Directory Entry represent?", back: "It holds the block number of the first block of the file." },
+            { module: "Module 2: File Management", front: "What does the value -1 represent in a File Allocation Table (FAT)?", back: "End of File (EOF)." },
+            { module: "Module 2: File Management", front: "What is the formula for calculating total allocated disk space from a FAT?", back: "Count the total number of linked blocks until -1, then multiply by the given Block Size." },
+            { module: "Module 2: File Management", front: "Compare the Maximum File Size of FAT32 vs. NTFS.", back: "FAT32: Limited to 4GB minus 1 byte. NTFS: Unlimited (up to 16 EB)." },
+            { module: "Module 2: File Management", front: "What is the Maximum File Name Length for FAT32 and NTFS?", back: "Both systems are limited to 255 characters." },
+            { module: "Module 2: File Management", front: "Compare Security features and Unicode support between FAT32 and NTFS.", back: "Security: FAT32 = No, NTFS = Yes. Unicode Support: FAT32 = No, NTFS = Yes." },
+            
+            // Module 3
+            { module: "Module 3: Process Management", front: "Differentiate a Program from a Process.", back: "Program: Passive entity, static code residing on disk.\nProcess: Active entity, a program currently in execution loaded into RAM." },
+            { module: "Module 3: Process Management", front: "Compare I/O-bound vs. CPU-bound processes.", back: "I/O-bound: Spends most time doing I/O operations (typing, downloading). CPU-bound: Spends most time doing heavy computations (rendering, mining)." },
+            { module: "Module 3: Process Management", front: "List reasons for Process Creation and Termination.", back: "Creation: User opens app, OS startup, spawned by another process.\nTermination: Normal exit, fatal error, killed by user or OS." },
+            { module: "Module 3: Process Management", front: "Define Hardware and Software Interrupts.", back: "Hardware: Signals from physical devices (mouse click, timer). Software (Trap): Signals from running processes (divide by zero, system call)." },
+            { module: "Module 3: Process Management", front: "Outline the Process States (7-State).", back: "New, Ready, Running, Blocked (Waiting for I/O), Exit. Plus swapped states: Ready-Suspend (on disk) and Blocked-Suspend (on disk)." },
+            { module: "Module 3: Process Management", front: "Define the PCB and its components.", back: "Process Control Block (PCB) is the OS's internal data structure representing a process. Contains: PID, State, Program Counter, CPU registers, Memory limits." },
+            { module: "Module 3: Process Management", front: "Explain Context Switching.", back: "The process of saving the state/PCB of the currently running process and loading the state/PCB of the next process to be executed by the CPU." },
+            { module: "Module 3: Process Management", front: "Compare OS Schedulers.", back: "Long-Term: Selects jobs from disk into RAM (controls multiprogramming degree). Medium-Term: Swaps processes between RAM and Disk. Short-Term: Selects which Ready process gets the CPU next." },
+            { module: "Module 3: Process Management", front: "Define Scheduling Criteria.", back: "Arrival time: When it entered ready queue. Burst: CPU time needed. Completion: When it finishes. Turnaround: Completion - Arrival. Waiting: Turnaround - Burst. Response: Time until first output." },
+            { module: "Module 3: Process Management", front: "Identify Scheduling Algorithms.", back: "FCFS (First Come First Serve), SJF (Shortest Job First), Priority (highest priority goes first), Round Robin (each gets a fixed time quantum)." },
+            { module: "Module 3: Process Management", front: "Differentiate Pre-emptive vs. Non pre-emptive.", back: "Pre-emptive: OS can forcefully interrupt a running process (Round Robin). Non pre-emptive: Process keeps CPU until it voluntarily yields or finishes (FCFS)." },
+            { module: "Module 3: Process Management", front: "What OS features are triggered when a user runs multiple apps on a single-processor computer?", back: "Context Switching (switching between apps), File Management (saving files), and Virtual Memory (handling large files that exceed RAM)." },
+            { module: "Module 3: Process Management", front: "What is the impact of increasing the number of processes on a single CPU?", back: "Response time increases (gets slower) and OS memory management work increases." },
+            { module: "Module 3: Process Management", front: "Explain the process state transition: Ready → Running.", back: "The OS schedules the process to run on the CPU." },
+            { module: "Module 3: Process Management", front: "Explain the process state transition: Running → Ready.", back: "The OS suspends the process (preemption) to let another process run." },
+            { module: "Module 3: Process Management", front: "Explain the process state transition: Running → Blocked.", back: "The process requests an I/O operation (like saving a file to a hard disk) and must wait." },
+            { module: "Module 3: Process Management", front: "Explain the process state transition: Blocked → Ready.", back: "The requested I/O operation finishes, and the process waits for the CPU again." },
+            { module: "Module 3: Process Management", front: "What is the transition name when a process moves from Running to Blocked, and from Blocked to Ready?", back: "Running to Blocked: I/O wait. Blocked to Ready: I/O completed." },
+            { module: "Module 3: Process Management", front: "What happens when a Ready process or a Blocked process runs out of main memory and is moved to secondary storage?", back: "They are \"suspended\" and become \"Swapped out and Waiting\" or \"Swapped out and Blocked\"." },
+            { module: "Module 3: Process Management", front: "What is the transition name when a process is moved back from secondary storage to main memory?", back: "Activate." },
+            { module: "Module 3: Process Management", front: "Name two techniques used in operating systems to optimize processor utilization.", back: "Multiprogramming and Time sharing." },
+            { module: "Module 3: Process Management", front: "Define Multiprogramming.", back: "A technique where multiple programs are kept in memory simultaneously so the CPU is always busy executing one of them." },
+            { module: "Module 3: Process Management", front: "Define Time sharing.", back: "A technique where each active user or task is given a small time slot to use the CPU, with the system rapidly switching between them." },
+            { module: "Module 3: Process Management", front: "Why does a Running process move to the Blocked state?", back: "It requests a resource that is not immediately available, such as waiting for I/O." },
+            { module: "Module 3: Process Management", front: "Name the only two states from which a process can directly move into the Blocked state.", back: "1. Running, 2. Swapped out and Blocked." },
+            
+            // Module 4
+            { module: "Module 4: Resource & Memory Management", front: "Define the MMU and its role.", back: "Memory Management Unit (MMU) is hardware that automatically translates logical (virtual) addresses generated by the CPU into physical RAM addresses." },
+            { module: "Module 4: Resource & Memory Management", front: "Explain Virtual Memory and its goals.", back: "A technique that uses disk space to simulate extra RAM. Goals: Run applications larger than physical RAM, safely isolate processes, and increase multiprogramming." },
+            { module: "Module 4: Resource & Memory Management", front: "Define Frames and Pages.", back: "Frame: A fixed-sized block of Physical Memory (RAM).\nPage: A fixed-sized block of Logical Memory (Virtual space)." },
+            { module: "Module 4: Resource & Memory Management", front: "State the golden rule of Paging.", back: "Size of Frame = Size of Page. This allows any Page to fit perfectly into any available Frame." },
+            { module: "Module 4: Resource & Memory Management", front: "Break down the Logical Address components.", back: "Page Number (p): Used as an index into the Page Table to find the Frame. Page Offset (d): The exact byte location within that specific page/frame." },
+            { module: "Module 4: Resource & Memory Management", front: "What mechanism is used when a user program exceeds physical memory size and only demanded areas are loaded?", back: "Demand Paging (which uses pages, frames, and page tables)." },
+            { module: "Module 4: Resource & Memory Management", front: "What is an example of something that is NOT a standard OS responsibility regarding memory?", back: "The OS does not track the execution usage history of specific compiled program files." },
+            { module: "Module 4: Resource & Memory Management", front: "How do you find the number of Page Number bits when given an 18-bit virtual address and a 6-bit page offset?", back: "Subtract the offset from the virtual address length: 18 - 6 = 12 bits." },
+            { module: "Module 4: Resource & Memory Management", front: "How do you calculate the Total Number of Pages with a 12-bit page number?", back: "2^12 = 4096 pages." },
+            { module: "Module 4: Resource & Memory Management", front: "Split the 18-bit binary address 010111000000111100 into Page Number and Offset.", back: "Leftmost 12 bits (010111000000) = Page 1472. Rightmost 6 bits (111100) = Offset 60." },
+            
+            // Module 5
+            { module: "Module 5: Device Management", front: "Explain the role of System Call API and Device Drivers.", back: "System Calls provide a unified API for apps to request OS services safely. Device Drivers are specialized software translating OS commands into hardware-specific signals." },
+            { module: "Module 5: Device Management", front: "Define Spooling.", back: "Simultaneous Peripheral Operation On Line. It buffers data being sent to a slow device (like a printer)." },
+            { module: "Module 5: Device Management", front: "Explain the mechanism and advantage of spooling.", back: "Mechanism: Uses a FIFO buffer on a fast disk to temporarily hold data. Advantage: Allows the fast CPU to overlap I/O operations and move on to other tasks without waiting for the slow hardware." }
+        ];
+
+        // App State
+        let currentDeck = [...flashcards];
+        let currentIndex = 0;
+        let isFlipped = false;
+
+        // DOM Elements
+        const cardEl = document.getElementById('flashcard');
+        const frontModule = document.getElementById('front-module');
+        const frontText = document.getElementById('front-text');
+        const backModule = document.getElementById('back-module');
+        const backText = document.getElementById('back-text');
+        const progressText = document.getElementById('progress-text');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const filterSelect = document.getElementById('module-filter');
+        const shuffleBtn = document.getElementById('shuffle-btn');
+
+        // Functions
+        function renderCard() {
+            if (currentDeck.length === 0) {
+                frontText.textContent = "No cards found.";
+                backText.textContent = "Adjust filter.";
+                return;
+            }
+            const card = currentDeck[currentIndex];
+            
+            // Reset flip state instantly if moving to next card
+            if (isFlipped) {
+                cardEl.style.transition = 'none';
+                cardEl.classList.remove('is-flipped');
+                isFlipped = false;
+                setTimeout(() => { cardEl.style.transition = 'transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1)'; }, 50);
+            }
+
+            frontModule.textContent = card.module.split(':')[0];
+            frontText.textContent = card.front;
+            
+            backModule.textContent = card.module.split(':')[0];
+            backText.textContent = card.back;
+
+            progressText.textContent = `${currentIndex + 1} / ${currentDeck.length}`;
+            
+            prevBtn.disabled = currentIndex === 0;
+            nextBtn.disabled = currentIndex === currentDeck.length - 1;
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Event Listeners
+        cardEl.addEventListener('click', () => {
+            isFlipped = !isFlipped;
+            cardEl.classList.toggle('is-flipped');
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentIndex < currentDeck.length - 1) {
+                currentIndex++;
+                renderCard();
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderCard();
+            }
+        });
+
+        filterSelect.addEventListener('change', (e) => {
+            const filter = e.target.value;
+            if (filter === 'All') {
+                currentDeck = [...flashcards];
+            } else {
+                currentDeck = flashcards.filter(c => c.module.startsWith(filter));
+            }
+            currentIndex = 0;
+            renderCard();
+        });
+
+        shuffleBtn.addEventListener('click', () => {
+            shuffle(currentDeck);
+            currentIndex = 0;
+            renderCard();
+        });
+
+        // Initialize
+        renderCard();
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'ArrowDown') {
+                e.preventDefault();
+                isFlipped = !isFlipped;
+                cardEl.classList.toggle('is-flipped');
+            } else if (e.code === 'ArrowRight') {
+                nextBtn.click();
+            } else if (e.code === 'ArrowLeft') {
+                prevBtn.click();
+            }
+        });
+
+    </script>
+</body>
+</html>

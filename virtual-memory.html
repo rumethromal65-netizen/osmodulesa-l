@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Memory & Swapping | OS Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/theme.css">
+    <style>
+        .nav-links { display: none; }
+        @media (min-width: 1024px) {
+            .nav-links { display: flex; flex-wrap: wrap; justify-content: flex-end; }
+        }
+        .process-block {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+        .process-block:hover {
+            transform: scale(1.02);
+            box-shadow: var(--hover-shadow);
+        }
+        /* Layout specific */
+        .slot {
+            min-height: 80px;
+            border: 2px dashed rgba(230, 223, 211, 0.5);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.2);
+            position: relative;
+        }
+    </style>
+</head>
+<body class="bg-[#FDFBF7] text-[#2C2A29]">
+    
+    <nav class="navbar">
+        <a href="index.html" class="nav-logo shrink-0">
+            <svg class="w-6 h-6 text-[#D4A373]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+            OS Visualizer
+        </a>
+        <div class="nav-links gap-2">
+            <a href="cpu-scheduling.html" class="nav-item">CPU</a>
+            <a href="memory-management.html" class="nav-item">MMU</a>
+            <a href="virtual-memory.html" class="nav-item active">Swapping</a>
+            <a href="paging.html" class="nav-item">Paging</a>
+            <a href="adv-states.html" class="nav-item">States</a>
+            <a href="context-switching.html" class="nav-item">Context</a>
+            <a href="boot-process.html" class="nav-item">Boot</a>
+        </div>
+    </nav>
+
+    <main class="flex-grow flex flex-col p-6 max-w-7xl mx-auto w-full animate-fade-in">
+        <header class="mb-6">
+            <h1 class="text-4xl mb-2">Virtual Memory & Swapping Simulator</h1>
+            <p class="text-[#6B635E]">Demonstrate how the Medium-Term Scheduler (MTS) manages crowded RAM by swapping processes out to a backing store (Disk).</p>
+        </header>
+
+        <div class="glass-panel p-4 mb-6 flex flex-wrap gap-4 items-center justify-between">
+            <div class="flex gap-4">
+                <button id="add-process-btn" class="btn-primary">Add New Process</button>
+                <button id="simulate-crowd-btn" class="btn-accent bg-[#E29578] border-[#E29578]">Simulate Crowd (Swap Out)</button>
+            </div>
+            
+            <div id="anim-status" class="text-sm font-bold text-[#6B635E] flex-grow text-right pr-4 mono">
+                System Idle.
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative h-[650px]">
+            <!-- RAM Container -->
+            <div class="glass-panel p-6 flex flex-col border-t-8 border-[#A3B18A]">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-[#A3B18A]">Main Memory (RAM)</h2>
+                    <span class="text-sm font-bold bg-[#E9EDC9] text-[#A3B18A] px-3 py-1 rounded-full"><span id="ram-count">0</span> / 5 Slots</span>
+                </div>
+                <p class="text-sm text-[#6B635E] mb-6 border-b border-[#E6DFD3] pb-2">Active Processes in Primary Storage</p>
+                
+                <div class="flex flex-col gap-4 flex-grow" id="ram-slots">
+                    <!-- Slots pre-rendered in JS -->
+                </div>
+            </div>
+
+            <!-- Disk Container -->
+            <div class="glass-panel p-6 flex flex-col border-t-8 border-[#D4A373]">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-[#D4A373]">Hard Disk (Backing Store)</h2>
+                    <span class="text-sm font-bold bg-[#F5F0E6] text-[#D4A373] px-3 py-1 rounded-full"><span id="disk-count">0</span> Suspended</span>
+                </div>
+                <p class="text-sm text-[#6B635E] mb-6 border-b border-[#E6DFD3] pb-2">Swapped Out / Suspended Processes</p>
+                
+                <div class="flex flex-col gap-4 flex-grow overflow-y-auto pr-2" id="disk-slots">
+                    <!-- Infinite slots, visually we can render 6-8 -->
+                </div>
+            </div>
+            
+            <!-- Floating Animated Arrow -->
+            <div id="transfer-arrow" class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 pointer-events-none transition-opacity duration-300 z-50">
+                <div class="bg-[#2C2A29] text-white p-4 rounded-full shadow-2xl flex items-center justify-center">
+                    <svg id="arrow-icon" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Hidden Template for Process Block -->
+    <template id="process-template">
+        <div class="process-block w-full h-full absolute inset-0 bg-[#FDFBF7] border-2 rounded-xl flex items-center p-4 gap-4 z-10">
+            <div class="w-12 h-12 rounded-lg bg-[#E6DFD3] flex items-center justify-center font-bold text-lg mono text-[#2C2A29] pid"></div>
+            <div class="flex-grow">
+                <div class="font-bold text-sm text-[#2C2A29] pname"></div>
+                <div class="text-xs text-[#6B635E] pstate"></div>
+            </div>
+            <div>
+                <button class="swap-in-btn hidden bg-[#A3B18A] text-white text-xs font-bold px-3 py-1 rounded">Swap In</button>
+            </div>
+        </div>
+    </template>
+
+    <script src="js/virtual-memory.js"></script>
+</body>
+</html>

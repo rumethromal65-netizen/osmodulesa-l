@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adv Process States | OS Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/theme.css">
+    <style>
+        .nav-links { display: none; }
+        @media (min-width: 1024px) {
+            .nav-links { display: flex; flex-wrap: wrap; justify-content: flex-end; }
+        }
+        
+        .state-node {
+            position: absolute;
+            width: 140px;
+            height: 70px;
+            background: #FDFBF7;
+            border: 3px solid #D4A373;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: 800;
+            color: #2C2A29;
+            box-shadow: var(--card-shadow);
+            z-index: 10;
+            line-height: 1.2;
+            font-size: 14px;
+        }
+        
+        /* Node positions */
+        #node-new { top: 100px; left: 50px; border-color: #a855f7; }
+        #node-ready { top: 100px; left: 300px; border-color: #3b82f6; }
+        #node-running { top: 100px; left: 600px; border-color: #10b981; }
+        #node-waiting { top: 250px; left: 450px; border-color: #f59e0b; }
+        #node-terminated { top: 100px; left: 850px; border-color: #ef4444; }
+        
+        #node-suspend-ready { top: 450px; left: 300px; border-color: #0ea5e9; }
+        #node-suspend-wait { top: 450px; left: 450px; border-color: #fb923c; }
+
+        /* Zones */
+        .ram-zone {
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 380px;
+            background-color: rgba(230, 223, 211, 0.2);
+            border-bottom: 2px dashed #D4A373;
+            z-index: 1;
+        }
+        .disk-zone {
+            position: absolute;
+            top: 380px; left: 0; right: 0; bottom: 0;
+            background-color: rgba(226, 149, 120, 0.1);
+            z-index: 1;
+        }
+        .zone-label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-weight: bold;
+            color: #6B635E;
+            opacity: 0.5;
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* The moving token */
+        #process-token {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: #2C2A29;
+            border-radius: 50%;
+            z-index: 20;
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-family: 'JetBrains Mono', monospace;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            pointer-events: none;
+            opacity: 0;
+        }
+        
+        .connection-line {
+            stroke: #E6DFD3;
+            stroke-width: 4;
+            fill: none;
+            marker-end: url(#arrowhead);
+        }
+        .connection-line-dual {
+            stroke: #E6DFD3;
+            stroke-width: 4;
+            fill: none;
+            marker-start: url(#arrowhead-start);
+            marker-end: url(#arrowhead);
+        }
+    </style>
+</head>
+<body class="bg-[#FDFBF7] text-[#2C2A29]">
+    
+    <nav class="navbar">
+        <a href="index.html" class="nav-logo shrink-0">
+            <svg class="w-6 h-6 text-[#D4A373]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+            OS Visualizer
+        </a>
+        <div class="nav-links gap-2">
+            <a href="cpu-scheduling.html" class="nav-item">CPU</a>
+            <a href="memory-management.html" class="nav-item">MMU</a>
+            <a href="virtual-memory.html" class="nav-item">Swapping</a>
+            <a href="paging.html" class="nav-item">Paging</a>
+            <a href="adv-states.html" class="nav-item active">States</a>
+            <a href="context-switching.html" class="nav-item">Context</a>
+            <a href="boot-process.html" class="nav-item">Boot</a>
+        </div>
+    </nav>
+
+    <main class="flex-grow flex flex-col p-6 max-w-[1200px] mx-auto w-full animate-fade-in">
+        <header class="mb-4">
+            <h1 class="text-3xl mb-1">Advanced 7-State Process Model</h1>
+            <p class="text-[#6B635E] text-sm">Visualize a process transitioning through RAM and Virtual Memory (Swapping).</p>
+        </header>
+
+        <div class="glass-panel p-3 mb-4 flex flex-wrap gap-2 items-center justify-center text-xs">
+            <button id="btn-admit" class="btn-primary py-1 px-2">Admit (New&rarr;Ready)</button>
+            <button id="btn-dispatch" class="btn-accent py-1 px-2" disabled>Dispatch (Ready&rarr;Run)</button>
+            <button id="btn-interrupt" class="btn-primary bg-[#E6DFD3] text-[#2C2A29] border-[#E6DFD3] py-1 px-2" disabled>Interrupt (Run&rarr;Ready)</button>
+            <button id="btn-iowait" class="btn-primary bg-[#f97316] border-[#f97316] text-white py-1 px-2" disabled>I/O Request (Run&rarr;Wait)</button>
+            <button id="btn-ioevent" class="btn-primary bg-[#f97316] border-[#f97316] text-white py-1 px-2" disabled>I/O Event (Wait&rarr;Ready)</button>
+            <button id="btn-exit" class="btn-primary bg-[#ef4444] border-[#ef4444] text-white py-1 px-2" disabled>Exit (Run&rarr;Term)</button>
+            
+            <div class="w-full h-px bg-[#E6DFD3] my-1"></div>
+            
+            <button id="btn-suspend-wait" class="btn-primary bg-[#8b5cf6] border-[#8b5cf6] text-white py-1 px-2" disabled>Suspend (Wait&rarr;S.Wait)</button>
+            <button id="btn-resume-wait" class="btn-primary bg-[#8b5cf6] border-[#8b5cf6] text-white py-1 px-2" disabled>Resume (S.Wait&rarr;Wait)</button>
+            <button id="btn-suspend-ready" class="btn-primary bg-[#8b5cf6] border-[#8b5cf6] text-white py-1 px-2" disabled>Suspend (Ready&rarr;S.Ready)</button>
+            <button id="btn-resume-ready" class="btn-primary bg-[#8b5cf6] border-[#8b5cf6] text-white py-1 px-2" disabled>Resume (S.Ready&rarr;Ready)</button>
+            <button id="btn-ioevent-disk" class="btn-primary bg-[#f97316] border-[#f97316] text-white py-1 px-2" disabled>I/O Event (S.Wait&rarr;S.Ready)</button>
+
+            <button id="btn-reset" class="btn-primary ml-auto py-1 px-2 text-[#ef4444]">Reset</button>
+        </div>
+
+        <!-- Canvas Area -->
+        <div class="relative w-full h-[600px] glass-panel bg-white/50 overflow-hidden">
+            
+            <div class="ram-zone"><div class="zone-label">Main Memory (RAM)</div></div>
+            <div class="disk-zone"><div class="zone-label" style="top:auto; bottom:10px;">Virtual Memory (Disk)</div></div>
+
+            <!-- SVG Connectors -->
+            <svg class="absolute inset-0 w-full h-full pointer-events-none z-0" style="min-width: 1000px;">
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#E6DFD3" />
+                    </marker>
+                    <marker id="arrowhead-start" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto">
+                        <polygon points="10 0, 0 3.5, 10 7" fill="#E6DFD3" />
+                    </marker>
+                </defs>
+                <!-- New -> Ready -->
+                <path class="connection-line" d="M 190 135 L 290 135" />
+                <!-- Ready -> Running -->
+                <path class="connection-line" d="M 440 125 L 590 125" />
+                <!-- Running -> Ready (Interrupt) -->
+                <path class="connection-line" d="M 590 145 L 440 145" />
+                <!-- Running -> Waiting -->
+                <path class="connection-line" d="M 670 170 L 520 250" />
+                <!-- Waiting -> Ready -->
+                <path class="connection-line" d="M 450 270 L 370 170" />
+                <!-- Running -> Terminated -->
+                <path class="connection-line" d="M 740 135 L 840 135" />
+                
+                <!-- Swapping Lines -->
+                <!-- Waiting <-> Suspend Wait -->
+                <path class="connection-line-dual" d="M 520 320 L 520 440" />
+                <!-- Ready <-> Suspend Ready -->
+                <path class="connection-line-dual" d="M 370 170 L 370 440" />
+                <!-- Suspend Wait -> Suspend Ready -->
+                <path class="connection-line" d="M 440 485 L 440 485" />
+                
+                <!-- Added a slight curve for S.Wait -> S.Ready -->
+                <path class="connection-line" d="M 450 485 L 440 485" />
+
+            </svg>
+
+            <!-- State Nodes -->
+            <div id="node-new" class="state-node">NEW</div>
+            <div id="node-ready" class="state-node">READY</div>
+            <div id="node-running" class="state-node">RUNNING</div>
+            <div id="node-waiting" class="state-node">WAITING<br>(Blocked)</div>
+            <div id="node-terminated" class="state-node">TERMINATED</div>
+            
+            <div id="node-suspend-ready" class="state-node">SUSPEND<br>READY</div>
+            <div id="node-suspend-wait" class="state-node">SUSPEND<br>WAIT</div>
+
+            <!-- The Token -->
+            <div id="process-token">P1</div>
+            
+            <!-- Status Text -->
+            <div id="status-text" class="absolute bottom-4 right-4 font-bold text-lg text-[#6B635E] mono opacity-80 z-20 bg-white/80 px-4 py-2 rounded-lg border border-[#E6DFD3]">
+                Ready to admit.
+            </div>
+        </div>
+    </main>
+
+    <script src="js/adv-states.js"></script>
+</body>
+</html>

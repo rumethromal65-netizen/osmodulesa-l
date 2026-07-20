@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OS Visualizer | Desert Sandbox</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/theme.css">
+    <style>
+        .nav-links {
+            display: none;
+        }
+        @media (min-width: 1024px) {
+            .nav-links {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body class="bg-[#050505] text-white">
+    
+    <nav class="navbar">
+        <a href="index.html" class="nav-logo shrink-0">
+            <svg class="w-6 h-6 text-[#00f0ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+            OS Visualizer
+        </a>
+        <div class="nav-links gap-2">
+            <a href="cpu-scheduling.html" class="nav-item">CPU</a>
+            <a href="memory-management.html" class="nav-item">MMU</a>
+            <a href="virtual-memory.html" class="nav-item">Swapping</a>
+            <a href="paging.html" class="nav-item">Paging</a>
+            <a href="adv-states.html" class="nav-item">States</a>
+            <a href="context-switching.html" class="nav-item">Context</a>
+            <a href="boot-process.html" class="nav-item">Boot</a>
+            <a href="memorizer.html" class="nav-item">Memorizer</a>
+            <a href="fat-simulator.html" class="nav-item">FAT</a>
+        </div>
+    </nav>
+
+    <main class="flex-grow flex flex-col items-center justify-center p-8 animate-fade-in">
+        <div class="text-center max-w-2xl mb-12">
+            <h1 class="text-5xl md:text-6xl font-extrabold mb-4 text-[#00f0ff] drop-shadow-lg" style="text-shadow: 0 0 20px rgba(0,240,255,0.5);">The OS Sandbox</h1>
+            <p class="text-lg text-gray-400">Explore core Computer Science and Operating Systems concepts through interactive, minimalist simulations.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl w-full">
+
+            <!-- Card 6 -->
+            <a href="context-switching.html" class="glass-panel p-6 flex flex-col items-start text-left cursor-pointer group no-underline">
+                <div class="w-12 h-12 rounded-full bg-[rgba(0,240,255,0.1)] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-[#00f0ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                </div>
+                <h2 class="text-xl font-bold mb-2 group-hover:text-[#00f0ff] transition-colors">Context Switch</h2>
+                <p class="text-[#00f0ff] font-medium text-sm leading-relaxed">Demonstrate the OS saving and loading Process Control Blocks (PCBs) during CPU allocation.</p>
+            </a>
+
+            <!-- Card 7 -->
+            <a href="boot-process.html" class="glass-panel p-6 flex flex-col items-start text-left cursor-pointer group no-underline">
+                <div class="w-12 h-12 rounded-full bg-[rgba(0,240,255,0.1)] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-[#00f0ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                </div>
+                <h2 class="text-xl font-bold mb-2 group-hover:text-[#00f0ff] transition-colors">Boot Process</h2>
+                <p class="text-[#00f0ff] font-medium text-sm leading-relaxed">Follow the hardware initialization from BIOS to Bootloader to loading the Kernel into RAM.</p>
+            </a>
+
+            <!-- Card 1 -->
+            <a href="cpu-scheduling.html" class="glass-panel p-6 flex flex-col items-start text-left cursor-pointer group no-underline">
+                <div class="w-12 h-12 rounded-full bg-[rgba(0,240,255,0.1)] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-[#00f0ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h2 class="text-xl font-bold mb-2 group-hover:text-[#00f0ff] transition-colors">CPU Scheduling</h2>
+                <p class="text-[#00f0ff] font-medium text-sm leading-relaxed">Simulate Short-Term Scheduler policies like FCFS, SJF, Priority, and Round Robin.</p>
+            </a>
+            
+            <!-- Card 2 -->
+            <a href="memory-management.html" class="glass-panel p-6 flex flex-col items-start text-left cursor-pointer group no-underline">
+                <div class="w-12 h-12 rounded-full bg-[rgba(0,240,255,0.1)] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-[#00f0ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+                </div>
+                <h2 class="text-xl font-bold mb-2 group-hover:text-[#00f0ff] transition-colors">Memory Mapping</h2>
+                <p class="text-[#00f0ff] font-medium text-sm leading-relaxed">Visualize the MMU's Logical to Physical Address translation using a Relocation Register.</p>
+            </a>
+
+            <!-- Card 3 -->
+            <a href="virtual-memory.html" class="glass-panel p-6 flex flex-col items-start text-left cursor-pointer group no-underline">
+                <div class="w-12 h-12 rounded-full bg-[rgba(0,240,255,0.1)] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-[#00f0ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                </div>
+                <h2 class="text-xl font-bold mb-2 group-hover:text-[#00f0ff] transition-colors">Virtual Memory</h2>
+                <p class="text-[#00f0ff] font-medium text-sm leading-relaxed">Demonstrate Medium-Term Scheduler behavior swapping processes between RAM and Disk.</p>
+            </a>
+
+            <!-- Card 4 -->
+            <a href="paging.html" class="glass-panel p-6 flex flex-col items-start text-left cursor-pointer group no-underline">
+                <div class="w-12 h-12 rounded-full bg-[rgba(0,240,255,0.1)] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-[#00f0ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                </div>
+                <h2 class="text-xl font-bold mb-2 group-hover:text-[#00f0ff] transition-colors">Paging Architecture</h2>
+                <p class="text-[#00f0ff] font-medium text-sm leading-relaxed">Simulate a Page Table lookup, translating Page + Offset into a specific RAM Frame.</p>
+            </a>
+            <!-- Card 5 -->
+            <a href="fat-simulator.html" class="glass-panel p-6 flex flex-col items-start text-left cursor-pointer group no-underline">
+                <div class="w-12 h-12 rounded-full bg-[rgba(0,240,255,0.1)] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-[#00f0ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+                </div>
+                <h2 class="text-xl font-bold mb-2 group-hover:text-[#00f0ff] transition-colors">FAT Simulator</h2>
+                <p class="text-[#00f0ff] font-medium text-sm leading-relaxed">Understand directory entries, file block chaining, and calculate allocated disk space.</p>
+            </a>
+
+            <!-- Card 8 -->
+            <a href="adv-states.html" class="glass-panel p-6 flex flex-col items-start text-left cursor-pointer group no-underline">
+                <div class="w-12 h-12 rounded-full bg-[rgba(0,240,255,0.1)] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-[#00f0ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                </div>
+                <h2 class="text-xl font-bold mb-2 group-hover:text-[#00f0ff] transition-colors">Process States (7-State)</h2>
+                <p class="text-[#00f0ff] font-medium text-sm leading-relaxed">Visualize the 7-State Process Model featuring RAM/Disk Swap transitions.</p>
+            </a>
+
+            <!-- Card 9 -->
+            <a href="memorizer.html" class="glass-panel p-6 flex flex-col items-start text-left cursor-pointer group no-underline" style="border: 1px solid rgba(0, 240, 255, 0.2);">
+                <div class="w-12 h-12 rounded-full bg-[rgba(0,240,255,0.1)] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-[#00f0ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                </div>
+                <h2 class="text-xl font-bold mb-2 group-hover:text-[#00f0ff] transition-colors">OS Memorizer</h2>
+                <p class="text-[#00f0ff] font-medium text-sm leading-relaxed">High-velocity active recall flashcards covering all Operating System modules.</p>
+            </a>
+        </div>
+    </main>
+
+</body>
+</html>

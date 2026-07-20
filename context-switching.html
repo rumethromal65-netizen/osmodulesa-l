@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Context Switch | OS Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/theme.css">
+    <style>
+        .nav-links { display: none; }
+        @media (min-width: 1024px) {
+            .nav-links { display: flex; flex-wrap: wrap; justify-content: flex-end; }
+        }
+        
+        .pcb-block {
+            border: 4px solid;
+            background-color: #FDFBF7;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .cpu-block {
+            border: 4px solid #2C2A29;
+            background-color: #F5F0E6;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s;
+        }
+
+        .data-packet {
+            position: absolute;
+            width: 80px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .highlight-glow {
+            box-shadow: 0 0 25px currentColor;
+            transform: scale(1.05);
+        }
+        
+        .log-container {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #2C2A29;
+            color: #E6DFD3;
+        }
+        
+        .data-row {
+            transition: background-color 0.3s;
+        }
+    </style>
+</head>
+<body class="bg-[#FDFBF7] text-[#2C2A29]">
+    
+    <nav class="navbar">
+        <a href="index.html" class="nav-logo shrink-0">
+            <svg class="w-6 h-6 text-[#D4A373]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+            OS Visualizer
+        </a>
+        <div class="nav-links gap-2">
+            <a href="cpu-scheduling.html" class="nav-item">CPU</a>
+            <a href="memory-management.html" class="nav-item">MMU</a>
+            <a href="virtual-memory.html" class="nav-item">Swapping</a>
+            <a href="paging.html" class="nav-item">Paging</a>
+            <a href="adv-states.html" class="nav-item">States</a>
+            <a href="context-switching.html" class="nav-item active">Context</a>
+            <a href="boot-process.html" class="nav-item">Boot</a>
+        </div>
+    </nav>
+
+    <main class="flex-grow flex flex-col p-6 max-w-7xl mx-auto w-full animate-fade-in">
+        <header class="mb-6 flex justify-between items-end">
+            <div>
+                <h1 class="text-4xl mb-2">Context Switching Simulator</h1>
+                <p class="text-[#6B635E]">Demonstrate the OS saving and loading Process Control Blocks (PCBs) during CPU allocation.</p>
+            </div>
+            <button id="btn-switch" class="btn-accent px-6 py-3 text-lg">Trigger Context Switch</button>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 relative">
+            
+            <!-- PCB A -->
+            <div class="flex flex-col items-center">
+                <div class="pcb-block border-[#006D77] rounded-xl w-full max-w-sm p-4 relative" id="pcb-a">
+                    <h2 class="text-2xl font-bold text-[#006D77] text-center mb-4 border-b-2 border-[#006D77] pb-2">PCB (Process A)</h2>
+                    
+                    <div class="space-y-2 text-sm mono font-bold">
+                        <div class="flex justify-between bg-gray-100 p-2 rounded data-row" id="pcb-a-state">
+                            <span class="text-[#6B635E]">State</span>
+                            <span class="text-[#2C2A29]">Waiting</span>
+                        </div>
+                        <div class="flex justify-between bg-gray-100 p-2 rounded data-row" id="pcb-a-pc">
+                            <span class="text-[#6B635E]">Prog. Counter</span>
+                            <span class="text-[#006D77]">0x004A</span>
+                        </div>
+                        <div class="flex justify-between bg-gray-100 p-2 rounded data-row" id="pcb-a-reg">
+                            <span class="text-[#6B635E]">Registers</span>
+                            <span class="text-[#006D77]">R1=5, R2=10</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CPU -->
+            <div class="flex flex-col items-center justify-center">
+                <div class="cpu-block rounded-2xl w-full max-w-sm p-6 relative flex flex-col items-center text-center" id="cpu-core">
+                    <div class="w-16 h-16 rounded-full bg-[#E6DFD3] border-4 border-[#2C2A29] flex items-center justify-center mb-4">
+                        <svg class="w-8 h-8 text-[#2C2A29]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+                    </div>
+                    <h2 class="text-3xl font-extrabold text-[#2C2A29] mb-4">CPU</h2>
+                    
+                    <div class="w-full text-sm mono font-bold bg-white p-3 rounded-lg border border-[#E6DFD3]">
+                        <div class="text-[#6B635E] mb-1">Currently Executing:</div>
+                        <div class="text-xl" id="cpu-exec-title" style="color: #006D77">Process A</div>
+                        
+                        <div class="mt-4 space-y-1 text-xs">
+                            <div class="flex justify-between">
+                                <span class="text-[#6B635E]">PC:</span>
+                                <span id="cpu-pc">0x004A...</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-[#6B635E]">Regs:</span>
+                                <span id="cpu-reg">R1=5, R2=10</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PCB B -->
+            <div class="flex flex-col items-center">
+                <div class="pcb-block border-[#E29578] rounded-xl w-full max-w-sm p-4 relative" id="pcb-b">
+                    <h2 class="text-2xl font-bold text-[#E29578] text-center mb-4 border-b-2 border-[#E29578] pb-2">PCB (Process B)</h2>
+                    
+                    <div class="space-y-2 text-sm mono font-bold">
+                        <div class="flex justify-between bg-gray-100 p-2 rounded data-row" id="pcb-b-state">
+                            <span class="text-[#6B635E]">State</span>
+                            <span class="text-[#2C2A29]">Ready</span>
+                        </div>
+                        <div class="flex justify-between bg-gray-100 p-2 rounded data-row" id="pcb-b-pc">
+                            <span class="text-[#6B635E]">Prog. Counter</span>
+                            <span class="text-[#E29578]">0x10B2</span>
+                        </div>
+                        <div class="flex justify-between bg-gray-100 p-2 rounded data-row" id="pcb-b-reg">
+                            <span class="text-[#6B635E]">Registers</span>
+                            <span class="text-[#E29578]">R1=0, R2=99</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Animating Data Packets -->
+            <div id="packet-save" class="data-packet bg-[#006D77]">Save State</div>
+            <div id="packet-load" class="data-packet bg-[#E29578]">Load State</div>
+        </div>
+
+        <!-- System Log -->
+        <div class="mt-8 log-container p-4 rounded-xl h-48 overflow-y-auto w-full shadow-inner border border-[#6B635E]" id="sys-log">
+            <div class="text-[#A3B18A]">> System Initialized. CPU is running Process A.</div>
+        </div>
+    </main>
+
+    <script src="js/context-switching.js"></script>
+</body>
+</html>
