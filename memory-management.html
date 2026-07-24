@@ -55,10 +55,35 @@
             <p class="text-[var(--text-lo)]">Simulate the hardware data flow: translating a Logical Address to a Physical Address via the MMU.</p>
         </header>
 
+        <div class="glass-panel p-6 mb-6">
+            <h2 class="text-2xl font-bold text-[var(--yellow)] mb-3 flex items-center gap-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                How Memory Management Works
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-[var(--text-mid)]">
+                <div>
+                    <h3 class="font-bold text-[var(--text-hi)] mb-1">1. Logical vs. Physical Addresses</h3>
+                    <p class="mb-3">The CPU generates a <strong>Logical Address</strong> (e.g., 346), assuming the program's memory starts at zero. However, the program is actually stored somewhere else in the physical RAM at a real <strong>Physical Address</strong>.</p>
+                    <h3 class="font-bold text-[var(--text-hi)] mb-1">2. The Relocation (Base) Register</h3>
+                    <p>The MMU uses a <strong>Relocation Register</strong> holding the starting physical address of the process. It adds this to the logical address to instantly find the exact location in RAM.</p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-[var(--text-hi)] mb-1">3. The Limit Register</h3>
+                    <p class="mb-3">To prevent a program from accessing memory outside its sandbox, the MMU checks the logical address against a <strong>Limit Register</strong> (the maximum size of the process).</p>
+                    <h3 class="font-bold text-red-400 mb-1">4. Hardware Security Check</h3>
+                    <p>If <code>Logical Address >= Limit Register</code>, the MMU blocks it! A <strong>Segmentation Fault</strong> is thrown, and the OS aborts the process to protect other programs.</p>
+                </div>
+            </div>
+        </div>
+
         <div class="glass-panel p-6 mb-8 flex flex-col md:flex-row gap-4 items-end">
             <div class="flex-grow">
-                <label class="block text-sm font-semibold mb-1 text-[var(--text-lo)]">Logical Address (e.g. 346)</label>
+                <label class="block text-sm font-semibold mb-1 text-[var(--text-lo)]">Logical Address</label>
                 <input type="number" id="logical-input" value="346" min="0" class="w-full">
+            </div>
+            <div class="flex-grow">
+                <label class="block text-sm font-semibold mb-1 text-[var(--text-lo)]">Limit Register (Size)</label>
+                <input type="number" id="limit-input" value="500" min="0" class="w-full">
             </div>
             <div class="flex-grow">
                 <label class="block text-sm font-semibold mb-1 text-[var(--text-lo)]">Relocation Register (e.g. 14000)</label>
@@ -91,9 +116,15 @@
             <div id="node-mmu" class="absolute left-[400px] top-[50px] w-[300px] h-[400px] border-4 border-[var(--accent-sage)] rounded-2xl bg-[var(--sand-bg)] z-10 flex flex-col items-center p-4 transition-all duration-300">
                 <h3 class="text-xl mb-2 text-[var(--accent-camel)]">Memory Management Unit</h3>
                 
-                <div class="flex-grow w-full flex flex-col items-center justify-center relative">
+                <div class="flex-grow w-full flex flex-col items-center justify-center relative mt-4">
+                    <!-- Limit Register Check -->
+                    <div id="node-limit" class="bg-[var(--bg-level2)] border-2 border-red-500/50 p-2 rounded w-full text-center transition-all duration-300 mb-4 z-20">
+                        <span class="text-xs font-bold text-red-400 block">Limit Check (Logical < Limit)</span>
+                        <span id="display-limit" class="mono font-bold text-lg text-red-300">---</span>
+                    </div>
+
                     <!-- Adder -->
-                    <div id="node-adder" class="w-16 h-16 rounded-full bg-[var(--accent-sage)] border-2 border-[var(--accent-sage)] flex items-center justify-center text-2xl font-bold z-20 transition-all duration-300 mb-8 mt-12">
+                    <div id="node-adder" class="w-16 h-16 rounded-full bg-[var(--accent-sage)] border-2 border-[var(--accent-sage)] flex items-center justify-center text-2xl font-bold z-20 transition-all duration-300 mb-4 mt-2">
                         +
                     </div>
                     
