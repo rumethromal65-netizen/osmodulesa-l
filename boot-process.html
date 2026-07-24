@@ -5,156 +5,146 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Boot Process | OS Visualizer</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="theme.css">
     <style>
-        .nav-links { display: none; }
-        @media (min-width: 1024px) {
-            .nav-links { display: flex; flex-wrap: wrap; justify-content: flex-end; }
+        .power-line {
+            stroke: rgba(250,204,21,0.2);
+            stroke-width: 3;
+            fill: none;
+            stroke-dasharray: 8;
+            transition: stroke 0.5s, opacity 0.5s;
         }
-        
-        .hw-block {
-            border: 4px solid #E6DFD3;
-            background-color: #FDFBF7;
-            border-radius: 12px;
-            padding: 16px;
-            transition: all 0.5s;
-            position: relative;
+        .power-line.active {
+            stroke: var(--yellow);
+            stroke-dasharray: 8;
+            animation: dash 0.8s linear infinite;
+            filter: drop-shadow(0 0 4px var(--yellow-glow));
         }
-
-        .hw-active {
-            box-shadow: 0 0 25px currentColor;
-            transform: scale(1.05);
-            background-color: white;
-            z-index: 10;
-        }
-
         .kernel-token {
             position: absolute;
-            background: #16a34a; /* green */
-            color: white;
-            font-weight: bold;
+            background: var(--grad-btn);
+            color: #000;
+            font-weight: 800;
             border-radius: 8px;
             padding: 8px 16px;
             opacity: 0;
             pointer-events: none;
             transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 50;
-            box-shadow: 0 4px 15px rgba(22, 163, 74, 0.4);
-        }
-
-        .power-line {
-            stroke: #E6DFD3;
-            stroke-width: 4;
-            fill: none;
-            stroke-dasharray: 10;
-            opacity: 0.3;
-            transition: stroke 0.5s, opacity 0.5s;
-        }
-        
-        .power-line.active {
-            stroke-dasharray: 10;
-            animation: dash 1s linear infinite;
-            opacity: 1;
-        }
-
-        @keyframes dash {
-            to { stroke-dashoffset: -20; }
-        }
-        
-        .log-container {
             font-family: 'JetBrains Mono', monospace;
-            background-color: #2C2A29;
-            color: #E6DFD3;
+            font-size: 0.8rem;
+            box-shadow: 0 4px 16px var(--yellow-glow);
+        }
+        .hw-icon-ring {
+            width: 72px; height: 72px;
+            border-radius: 50%;
+            background: var(--yellow-mist);
+            border: 1.5px solid var(--border-mid);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1rem;
+            transition: all 0.5s;
+        }
+        .hw-active .hw-icon-ring {
+            background: var(--yellow-soft);
+            border-color: var(--yellow);
+            box-shadow: 0 0 16px var(--yellow-glow);
         }
     </style>
 </head>
-<body class="bg-[#FDFBF7] text-[#2C2A29]">
-    
-    <nav class="navbar">
-        <a href="index.html" class="nav-logo shrink-0">
-            <svg class="w-6 h-6 text-[#D4A373]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-            OS Visualizer
-        </a>
-        <div class="nav-links gap-2">
-            <a href="cpu-scheduling.html" class="nav-item">CPU</a>
-            <a href="memory-management.html" class="nav-item">MMU</a>
-            <a href="virtual-memory.html" class="nav-item">Swapping</a>
-            <a href="paging.html" class="nav-item">Paging</a>
-            <a href="adv-states.html" class="nav-item">States</a>
-            <a href="context-switching.html" class="nav-item">Context</a>
-            <a href="boot-process.html" class="nav-item active">Boot</a>
-        </div>
+<body>
+
+    <!-- Top Bar -->
+    <nav class="top-bar">
+        <a href="index.html" class="back-home-btn">← Back to Home</a>
     </nav>
 
-    <main class="flex-grow flex flex-col p-6 max-w-7xl mx-auto w-full animate-fade-in">
-        <header class="mb-6 flex justify-between items-end flex-wrap gap-4">
-            <div>
-                <h1 class="text-4xl mb-2">Booting Process Sequence</h1>
-                <p class="text-[#6B635E]">Visualize the hardware initialization and OS Kernel loading phases.</p>
-            </div>
-            <button id="btn-power" class="btn-primary bg-[#ef4444] border-[#ef4444] hover:text-[#ef4444] px-6 py-3 text-lg font-bold text-white shadow-lg">Power On System</button>
-        </header>
+    <main class="flex-grow flex flex-col p-6 max-w-7xl mx-auto w-full animate-fade-in" style="gap:1.5rem">
 
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 relative mt-8">
-            
-            <!-- SVG Connectors Background -->
-            <svg class="absolute inset-0 w-full h-full pointer-events-none hidden lg:block" style="z-index: 0">
-                <path id="line-psu-bios" class="power-line" d="M 120 100 L 250 100" />
-                <path id="line-bios-disk" class="power-line" d="M 380 100 L 520 100" />
-                <path id="line-disk-ram" class="power-line" d="M 640 100 L 780 100" />
+        <!-- Header -->
+        <div class="section-header flex flex-wrap items-center justify-between gap-4">
+            <div>
+                <h1>Boot Process Sequence</h1>
+                <p>Visualize the hardware initialization and OS Kernel loading phases.</p>
+            </div>
+            <button id="btn-power" class="btn-primary px-6 py-3 text-base">⚡ Power On System</button>
+        </div>
+
+        <!-- Hardware Blocks -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 relative">
+
+            <!-- SVG Connectors -->
+            <svg class="absolute inset-0 w-full h-full pointer-events-none hidden lg:block" style="z-index:0">
+                <path id="line-psu-bios"  class="power-line" d="M 130 90 L 230 90"/>
+                <path id="line-bios-disk" class="power-line" d="M 370 90 L 480 90"/>
+                <path id="line-disk-ram"  class="power-line" d="M 620 90 L 720 90"/>
             </svg>
 
-            <!-- 1. PSU -->
-            <div class="hw-block text-center flex flex-col items-center" id="block-psu" style="color: #ef4444">
-                <h2 class="text-2xl font-bold mb-4">Power Supply</h2>
-                <div class="w-20 h-20 rounded bg-gray-100 flex items-center justify-center mb-4 border border-gray-300">
-                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            <!-- PSU -->
+            <div class="hw-block text-center" id="block-psu">
+                <div class="hw-icon-ring">
+                    <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
                 </div>
-                <div class="text-sm font-bold opacity-0 transition-opacity" id="status-psu">Supplying 5V/12V Good...</div>
+                <h2 class="text-lg font-bold mb-1" style="color:var(--yellow)">Power Supply</h2>
+                <p class="text-xs mb-3" style="color:var(--text-lo)">PSU — 5V / 12V</p>
+                <div class="text-xs font-bold opacity-0 transition-opacity label-tag" id="status-psu">Power Good ✓</div>
             </div>
 
-            <!-- 2. BIOS -->
-            <div class="hw-block text-center flex flex-col items-center" id="block-bios" style="color: #f59e0b">
-                <h2 class="text-2xl font-bold mb-4">ROM / BIOS</h2>
-                <div class="w-20 h-20 rounded bg-gray-100 flex items-center justify-center mb-4 border border-gray-300">
-                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            <!-- BIOS -->
+            <div class="hw-block text-center" id="block-bios">
+                <div class="hw-icon-ring">
+                    <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
+                    </svg>
                 </div>
-                <div class="text-sm font-bold opacity-0 transition-opacity" id="status-bios">Running POST...</div>
+                <h2 class="text-lg font-bold mb-1" style="color:var(--yellow)">ROM / BIOS</h2>
+                <p class="text-xs mb-3" style="color:var(--text-lo)">POST & Boot Config</p>
+                <div class="text-xs font-bold opacity-0 transition-opacity label-tag" id="status-bios">Running POST…</div>
             </div>
 
-            <!-- 3. Hard Disk -->
-            <div class="hw-block text-center flex flex-col items-center" id="block-disk" style="color: #3b82f6">
-                <h2 class="text-2xl font-bold mb-4">Hard Disk</h2>
-                
-                <div class="w-full bg-gray-100 border border-gray-300 p-2 rounded mb-2 text-sm text-[#2C2A29]">
-                    <span class="font-bold">Sector 0:</span> MBR Bootloader
+            <!-- Hard Disk -->
+            <div class="hw-block text-center" id="block-disk">
+                <div class="hw-icon-ring">
+                    <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
                 </div>
-                <div class="w-full bg-[#16a34a]/20 border border-[#16a34a] p-2 rounded mb-4 text-sm text-[#16a34a] font-bold" id="disk-kernel">
-                    OS Kernel
+                <h2 class="text-lg font-bold mb-1" style="color:var(--yellow)">Hard Disk</h2>
+                <div class="text-left mt-2 space-y-1">
+                    <div class="rounded p-2 text-xs" style="background:var(--bg-level3);border:1px solid var(--border-lo);color:var(--text-mid)">
+                        <span class="font-bold" style="color:var(--text-hi)">Sector 0:</span> MBR Bootloader
+                    </div>
+                    <div class="rounded p-2 text-xs font-bold" id="disk-kernel" style="background:var(--yellow-mist);border:1px solid var(--border-mid);color:var(--yellow)">
+                        OS Kernel Image
+                    </div>
                 </div>
-
-                <div class="text-sm font-bold opacity-0 transition-opacity" id="status-disk">Locating OS...</div>
+                <div class="text-xs font-bold opacity-0 transition-opacity label-tag mt-2" id="status-disk">Locating OS…</div>
             </div>
 
-            <!-- 4. Main RAM -->
-            <div class="hw-block text-center flex flex-col items-center" id="block-ram" style="color: #16a34a; min-height: 250px;">
-                <h2 class="text-2xl font-bold mb-4">Main Memory</h2>
-                
-                <div class="w-full h-32 bg-gray-100 border border-gray-300 rounded relative" id="ram-container">
-                    <div class="absolute inset-0 flex items-center justify-center text-[#6B635E] opacity-50" id="ram-empty">Empty</div>
+            <!-- RAM -->
+            <div class="hw-block text-center" id="block-ram" style="min-height:240px">
+                <div class="hw-icon-ring">
+                    <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <h2 class="text-lg font-bold mb-1" style="color:var(--yellow)">Main Memory</h2>
+                <div class="w-full rounded relative mt-2 overflow-hidden" id="ram-container" style="height:90px;background:var(--bg-level3);border:1px solid var(--border-lo)">
+                    <div class="absolute inset-0 flex items-center justify-center text-xs" id="ram-empty" style="color:var(--text-lo)">Empty</div>
                 </div>
             </div>
 
-            <!-- Animated Kernel Token -->
+            <!-- Animated Token -->
             <div id="anim-kernel" class="kernel-token">OS Kernel</div>
         </div>
 
         <!-- System Log -->
-        <div class="mt-8 log-container p-4 rounded-xl h-64 overflow-y-auto w-full shadow-inner border border-[#6B635E]" id="sys-log">
-            <div class="text-[#6B635E]">> System is powered off.</div>
+        <div class="log-terminal h-52 w-full" id="sys-log">
+            <div class="log-line">> System is powered off.</div>
         </div>
     </main>
 
-    <script src="js/boot-process.js"></script>
+    <script src="boot-process.js"></script>
 </body>
 </html>

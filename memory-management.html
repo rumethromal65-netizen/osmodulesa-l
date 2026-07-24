@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memory Mapping Simulator | OS Visualizer</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="theme.css">
     <style>
         .nav-links { display: none; }
         @media (min-width: 1024px) {
             .nav-links { display: flex; flex-wrap: wrap; justify-content: flex-end; }
         }
         .flow-line {
-            stroke: #D4A373;
+            stroke: var(--accent-camel);
             stroke-width: 4;
             fill: none;
             stroke-dasharray: 10;
@@ -27,59 +27,48 @@
             to { stroke-dashoffset: -20; }
         }
         .node-highlight {
-            box-shadow: 0 0 20px #D4A373;
-            border-color: #D4A373;
+            box-shadow: 0 0 20px var(--accent-camel);
+            border-color: var(--accent-camel);
             transform: scale(1.05);
         }
         .ram-block {
             transition: all 0.3s;
         }
         .ram-block.active {
-            background-color: #E29578;
+            background-color: var(--accent-camel);
             color: white;
             font-weight: bold;
             transform: scale(1.05);
         }
     </style>
 </head>
-<body class="bg-[#FDFBF7] text-[#2C2A29]">
+<body class="">
     
-    <nav class="navbar">
-        <a href="index.html" class="nav-logo shrink-0">
-            <svg class="w-6 h-6 text-[#D4A373]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-            OS Visualizer
-        </a>
-        <div class="nav-links gap-2">
-            <a href="cpu-scheduling.html" class="nav-item">CPU</a>
-            <a href="memory-management.html" class="nav-item active">MMU</a>
-            <a href="virtual-memory.html" class="nav-item">Swapping</a>
-            <a href="paging.html" class="nav-item">Paging</a>
-            <a href="adv-states.html" class="nav-item">States</a>
-            <a href="context-switching.html" class="nav-item">Context</a>
-            <a href="boot-process.html" class="nav-item">Boot</a>
-        </div>
+        <!-- Top Bar -->
+    <nav class="top-bar">
+        <a href="index.html" class="back-home-btn">← Back to Home</a>
     </nav>
 
     <main class="flex-grow flex flex-col p-6 max-w-6xl mx-auto w-full animate-fade-in">
         <header class="mb-8">
             <h1 class="text-4xl mb-2">Memory Management Architecture</h1>
-            <p class="text-[#6B635E]">Simulate the hardware data flow: translating a Logical Address to a Physical Address via the MMU.</p>
+            <p class="text-[var(--text-lo)]">Simulate the hardware data flow: translating a Logical Address to a Physical Address via the MMU.</p>
         </header>
 
         <div class="glass-panel p-6 mb-8 flex flex-col md:flex-row gap-4 items-end">
             <div class="flex-grow">
-                <label class="block text-sm font-semibold mb-1 text-[#6B635E]">Logical Address (e.g. 346)</label>
+                <label class="block text-sm font-semibold mb-1 text-[var(--text-lo)]">Logical Address (e.g. 346)</label>
                 <input type="number" id="logical-input" value="346" min="0" class="w-full">
             </div>
             <div class="flex-grow">
-                <label class="block text-sm font-semibold mb-1 text-[#6B635E]">Relocation Register (e.g. 14000)</label>
+                <label class="block text-sm font-semibold mb-1 text-[var(--text-lo)]">Relocation Register (e.g. 14000)</label>
                 <input type="number" id="relocation-input" value="14000" min="0" class="w-full">
             </div>
             <button id="translate-btn" class="btn-accent">Translate Address</button>
-            <button id="reset-btn" class="btn-primary bg-[#E6DFD3] text-[#2C2A29] border-[#E6DFD3]">Reset</button>
+            <button id="reset-btn" class="btn-ghost">Reset</button>
         </div>
 
-        <div class="relative w-full h-[600px] glass-panel bg-white/50 overflow-hidden" id="diagram-area">
+        <div class="relative w-full h-[600px] glass-panel bg-[var(--bg-level2)]/50 overflow-hidden" id="diagram-area">
             
             <!-- SVG Lines -->
             <svg class="absolute inset-0 w-full h-full pointer-events-none z-0">
@@ -90,58 +79,58 @@
             </svg>
 
             <!-- CPU -->
-            <div id="node-cpu" class="absolute left-[50px] top-[100px] w-[200px] h-[200px] border-4 border-[#2C2A29] rounded-2xl bg-[#F5F0E6] z-10 flex flex-col items-center p-4 transition-all duration-300">
-                <h3 class="text-xl mb-4 text-[#2C2A29]">CPU</h3>
-                <div class="bg-white border-2 border-[#D4A373] p-2 rounded w-full text-center mb-2">
-                    <span class="text-xs font-bold text-[#6B635E] block">Logical Address</span>
+            <div id="node-cpu" class="absolute left-[50px] top-[100px] w-[200px] h-[200px] border-4 border-[var(--text-main)] rounded-2xl bg-[var(--sand-warm)] z-10 flex flex-col items-center p-4 transition-all duration-300">
+                <h3 class="text-xl mb-4 text-[var(--text-main)]">CPU</h3>
+                <div class="bg-[var(--bg-level2)] border-2 border-[var(--accent-camel)] p-2 rounded w-full text-center mb-2">
+                    <span class="text-xs font-bold text-[var(--text-lo)] block">Logical Address</span>
                     <span id="display-logical" class="mono font-bold text-lg">---</span>
                 </div>
             </div>
 
             <!-- MMU -->
-            <div id="node-mmu" class="absolute left-[400px] top-[50px] w-[300px] h-[400px] border-4 border-[#A3B18A] rounded-2xl bg-[#FDFBF7] z-10 flex flex-col items-center p-4 transition-all duration-300">
-                <h3 class="text-xl mb-2 text-[#006D77]">Memory Management Unit</h3>
+            <div id="node-mmu" class="absolute left-[400px] top-[50px] w-[300px] h-[400px] border-4 border-[var(--accent-sage)] rounded-2xl bg-[var(--sand-bg)] z-10 flex flex-col items-center p-4 transition-all duration-300">
+                <h3 class="text-xl mb-2 text-[var(--accent-camel)]">Memory Management Unit</h3>
                 
                 <div class="flex-grow w-full flex flex-col items-center justify-center relative">
                     <!-- Adder -->
-                    <div id="node-adder" class="w-16 h-16 rounded-full bg-[#E9EDC9] border-2 border-[#A3B18A] flex items-center justify-center text-2xl font-bold z-20 transition-all duration-300 mb-8 mt-12">
+                    <div id="node-adder" class="w-16 h-16 rounded-full bg-[var(--accent-sage)] border-2 border-[var(--accent-sage)] flex items-center justify-center text-2xl font-bold z-20 transition-all duration-300 mb-8 mt-12">
                         +
                     </div>
                     
                     <!-- MAR -->
-                    <div id="node-mar" class="bg-white border-2 border-[#E29578] p-2 rounded w-full text-center transition-all duration-300">
-                        <span class="text-xs font-bold text-[#6B635E] block">MAR (Memory Address Register)</span>
+                    <div id="node-mar" class="bg-[var(--bg-level2)] border-2 border-[var(--accent-camel)] p-2 rounded w-full text-center transition-all duration-300">
+                        <span class="text-xs font-bold text-[var(--text-lo)] block">MAR (Memory Address Register)</span>
                         <span id="display-mar" class="mono font-bold text-lg">---</span>
                     </div>
 
                     <!-- Relocation Register -->
-                    <div id="node-reloc" class="absolute bottom-4 bg-white border-2 border-[#D4A373] p-2 rounded w-full text-center transition-all duration-300">
-                        <span class="text-xs font-bold text-[#6B635E] block">Relocation Register</span>
+                    <div id="node-reloc" class="absolute bottom-4 bg-[var(--bg-level2)] border-2 border-[var(--accent-camel)] p-2 rounded w-full text-center transition-all duration-300">
+                        <span class="text-xs font-bold text-[var(--text-lo)] block">Relocation Register</span>
                         <span id="display-reloc" class="mono font-bold text-lg">---</span>
                     </div>
                 </div>
             </div>
 
             <!-- RAM (Physical Memory) -->
-            <div id="node-ram" class="absolute left-[750px] top-[50px] w-[200px] h-[500px] border-4 border-[#006D77] rounded-lg bg-white z-10 flex flex-col transition-all duration-300 overflow-hidden">
-                <h3 class="text-center py-2 bg-[#006D77] text-white font-bold tracking-wider">PHYSICAL RAM</h3>
+            <div id="node-ram" class="absolute left-[750px] top-[50px] w-[200px] h-[500px] border-4 border-[var(--accent-camel)] rounded-lg bg-[var(--bg-level2)] z-10 flex flex-col transition-all duration-300 overflow-hidden">
+                <h3 class="text-center py-2 bg-[var(--accent-camel)] text-white font-bold tracking-wider">PHYSICAL RAM</h3>
                 <div class="flex-grow flex flex-col" id="ram-blocks">
                     <!-- Blocks dynamically populated -->
                 </div>
             </div>
             
             <!-- Floating math popup -->
-            <div id="math-popup" class="absolute left-[470px] top-[140px] bg-[#2C2A29] text-white p-3 rounded-lg font-bold mono z-30 opacity-0 transition-opacity duration-300 shadow-xl pointer-events-none transform -translate-x-1/2">
+            <div id="math-popup" class="absolute left-[470px] top-[140px] bg-[var(--bg-level3)] text-[var(--yellow)] p-3 rounded-lg font-bold mono z-30 opacity-0 transition-opacity duration-300 shadow-xl pointer-events-none transform -translate-x-1/2 border border-[var(--border-mid)]">
                 <span id="math-text"></span>
             </div>
 
             <!-- Status -->
-            <div id="anim-status" class="absolute bottom-6 left-6 text-[#2C2A29] font-bold bg-[#E9EDC9] px-4 py-2 rounded-lg border border-[#A3B18A] opacity-0 transition-opacity">
+            <div id="anim-status" class="absolute bottom-6 left-6 text-black font-bold bg-[var(--yellow)] px-4 py-2 rounded-lg opacity-0 transition-opacity">
                 Initializing...
             </div>
         </div>
     </main>
 
-    <script src="js/memory-management.js"></script>
+    <script src="memory-management.js"></script>
 </body>
 </html>

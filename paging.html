@@ -4,50 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paging Simulator</title>
+    <link rel="stylesheet" href="theme.css">
     <!-- We will use standard CSS variables for the Desert Minimalist theme -->
     <style>
-        :root {
-            --color-bg-primary: #050505;
-            --color-bg-secondary: #111111;
-            --color-bg-tertiary: #0a0a0a;
-            --color-accent-primary: #00f0ff;
-            --color-accent-secondary: #0090ff;
-            --color-text-primary: #ffffff;
-            --color-text-secondary: #aaaaaa;
-            --color-border: #333333;
-            
-            --shadow-sm: 0 1px 2px 0 rgba(0, 240, 255, 0.1);
-            --shadow-md: 0 4px 6px -1px rgba(0, 240, 255, 0.2), 0 2px 4px -1px rgba(0, 240, 255, 0.1);
-            --radius-md: 0.5rem;
-            --radius-lg: 0.75rem;
-            --radius-full: 9999px;
-        }
+        
 
         .back-home-btn {
             display: inline-block;
-            color: var(--color-accent-primary);
+            color: var(--accent-camel);
             text-decoration: none;
             font-weight: 600;
             padding: 0.5rem 1rem;
-            border: 1px solid var(--color-border);
+            border: 1px solid var(--sand-dark);
             border-radius: 6px;
-            background: rgba(0, 240, 255, 0.05);
+            background: rgba(250, 204, 21, 0.05);
             transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
+            box-shadow: 0 0 10px rgba(250, 204, 21, 0.1);
         }
 
         .back-home-btn:hover {
-            background: rgba(0, 240, 255, 0.15);
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
-            text-shadow: 0 0 8px var(--color-accent-primary);
+            background: rgba(250, 204, 21, 0.15);
+            box-shadow: 0 0 20px rgba(250, 204, 21, 0.4);
+            text-shadow: 0 0 8px var(--accent-camel);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body {
             font-family: 'Inter', system-ui, sans-serif;
-            background-color: var(--color-bg-primary);
-            color: var(--color-text-primary);
+            background-color: var(--sand-bg);
+            color: var(--text-main);
             line-height: 1.5;
             min-height: 100vh;
             display: flex;
@@ -56,8 +42,8 @@
 
         /* Navbar */
         .navbar {
-            background-color: var(--color-bg-tertiary);
-            border-bottom: 1px solid var(--color-border);
+            background-color: var(--sand-bg);
+            border-bottom: 1px solid var(--sand-dark);
             padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
@@ -67,7 +53,7 @@
         
         .nav-brand {
             font-weight: 600;
-            color: var(--color-accent-primary);
+            color: var(--accent-camel);
             text-decoration: none;
             display: flex;
             align-items: center;
@@ -77,18 +63,18 @@
         .nav-links { display: flex; gap: 1.5rem; }
         .nav-link {
             text-decoration: none;
-            color: var(--color-text-secondary);
+            color: var(--text-muted);
             font-weight: 500;
             transition: color 0.2s ease;
             padding: 0.5rem 0;
             position: relative;
         }
-        .nav-link:hover, .nav-link.active { color: var(--color-accent-primary); }
+        .nav-link:hover, .nav-link.active { color: var(--accent-camel); }
         .nav-link.active::after {
             content: '';
             position: absolute;
             bottom: 0; left: 0; width: 100%; height: 2px;
-            background-color: var(--color-accent-primary);
+            background-color: var(--accent-camel);
         }
 
         /* Views */
@@ -109,29 +95,29 @@
         @media (min-width: 768px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
         
         .card {
-            background-color: var(--color-bg-tertiary);
+            background-color: var(--sand-bg);
             border-radius: var(--radius-lg);
             padding: 2rem;
             box-shadow: var(--shadow-sm);
-            border: 1px solid var(--color-border);
+            border: 1px solid var(--sand-dark);
         }
 
         h2 { margin-bottom: 0.5rem; }
-        p { color: var(--color-text-secondary); margin-bottom: 1rem; }
+        p { color: var(--text-muted); margin-bottom: 1rem; }
         
         .input-group { display: flex; flex-direction: column; margin-bottom: 1.5rem; }
         .input-label { font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; }
         .input-field {
             padding: 0.75rem 1rem;
-            border: 1px solid var(--color-border);
+            border: 1px solid var(--sand-dark);
             border-radius: var(--radius-md);
             font-size: 1rem;
         }
-        .input-field:focus { outline: none; border-color: var(--color-accent-primary); }
+        .input-field:focus { outline: none; border-color: var(--accent-camel); }
 
         .result-box {
             margin-top: 1.5rem; padding: 1.5rem;
-            background-color: var(--color-bg-secondary);
+            background-color: var(--sand-warm);
             border-radius: var(--radius-md);
         }
 
@@ -144,8 +130,8 @@
         }
         
         table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 0.5rem; text-align: left; border-bottom: 1px solid var(--color-border); }
-        .active-row { background-color: var(--color-bg-secondary); font-weight: bold; }
+        th, td { padding: 0.5rem; text-align: left; border-bottom: 1px solid var(--sand-dark); }
+        .active-row { background-color: var(--sand-warm); font-weight: bold; }
 
         /* Animation Canvas */
         #animation-canvas {
@@ -156,7 +142,7 @@
             position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
             background: rgba(255,255,255,0.8);
             padding: 1rem 2rem; border-radius: var(--radius-full);
-            box-shadow: var(--shadow-md); text-align: center;
+            box-shadow: var(--card-shadow); text-align: center;
             pointer-events: none;
         }
     </style>
@@ -164,7 +150,7 @@
 <body>
 
     <!-- Top Controls -->
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; border-bottom: 1px solid var(--color-border); background: var(--color-bg-tertiary); z-index: 10;">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; border-bottom: 1px solid var(--sand-dark); background: var(--sand-bg); z-index: 10;">
         <a href="index.html" class="back-home-btn" style="margin: 0;">← Back to Home</a>
         <div class="nav-links">
             <a href="#calculator" class="nav-link" id="link-calculator">Calculator & Translation</a>
@@ -175,7 +161,7 @@
     <!-- Route: /calculator -->
     <main class="view" id="view-calculator">
         <div class="container">
-            <h1 style="text-align: center; margin-bottom: 2rem; color: var(--color-accent-primary);">Paging Calculator & Translation</h1>
+            <h1 style="text-align: center; margin-bottom: 2rem; color: var(--accent-camel);">Paging Calculator & Translation</h1>
             
             <div class="grid-2">
                 <!-- Calculation Module -->
@@ -219,21 +205,21 @@
                     
                     <h3 style="margin-top: 1.5rem;">1. Address Split</h3>
                     <div class="split-box">
-                        <div class="split-item" style="background-color: #111; border: 1px solid var(--color-accent-secondary); box-shadow: 0 0 10px rgba(0,240,255,0.2);">
-                            <div style="font-size: 1.25rem; font-weight: bold; color: var(--color-accent-primary); text-shadow: 0 0 8px var(--color-accent-primary);" id="split-p">2</div>
+                        <div class="split-item" style="background-color: #111; border: 1px solid var(--accent-sage); box-shadow: 0 0 10px rgba(250, 204, 21,0.2);">
+                            <div style="font-size: 1.25rem; font-weight: bold; color: var(--accent-camel); text-shadow: 0 0 8px var(--accent-camel);" id="split-p">2</div>
                             <div style="font-size: 0.875rem; color: #aaa;">Page Number ($p$)</div>
                         </div>
-                        <div class="split-item" style="background-color: #111; border: 1px solid var(--color-accent-primary); box-shadow: 0 0 10px rgba(0,240,255,0.2);">
-                            <div style="font-size: 1.25rem; font-weight: bold; color: var(--color-accent-primary); text-shadow: 0 0 8px var(--color-accent-primary);" id="split-d">308</div>
+                        <div class="split-item" style="background-color: #111; border: 1px solid var(--accent-camel); box-shadow: 0 0 10px rgba(250, 204, 21,0.2);">
+                            <div style="font-size: 1.25rem; font-weight: bold; color: var(--accent-camel); text-shadow: 0 0 8px var(--accent-camel);" id="split-d">308</div>
                             <div style="font-size: 0.875rem; color: #aaa;">Offset ($d$)</div>
                         </div>
                     </div>
                     
                     <h3 style="margin-top: 1.5rem;">2. Page Table Lookup</h3>
-                    <div style="margin-top: 1rem; border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden;">
+                    <div style="margin-top: 1rem; border: 1px solid var(--sand-dark); border-radius: var(--radius-md); overflow: hidden;">
                         <table id="page-table">
                             <thead>
-                                <tr style="background: var(--color-bg-primary);">
+                                <tr style="background: var(--sand-bg);">
                                     <th>Page Number</th>
                                     <th>Frame Number</th>
                                 </tr>
@@ -245,7 +231,7 @@
                     </div>
 
                     <h3 style="margin-top: 1.5rem;">3. Physical Address Resolution</h3>
-                    <div id="physical-result" style="padding: 1rem; background-color: var(--color-accent-primary); color: white; border-radius: var(--radius-md); margin-top: 1rem; text-align: center;">
+                    <div id="physical-result" style="padding: 1rem; background-color: var(--accent-camel); color: white; border-radius: var(--radius-md); margin-top: 1rem; text-align: center;">
                         <div style="font-size: 1.5rem; font-weight: bold;" id="res-physical">33076</div>
                         <div style="font-size: 0.875rem; opacity: 0.9;" id="res-formula">(Frame 8 × 4096) + 308</div>
                     </div>
@@ -258,7 +244,7 @@
     <main class="view" id="view-animation" style="position: relative;">
         <canvas id="animation-canvas"></canvas>
         <div class="overlay-text">
-            <h3 style="margin: 0; color: var(--color-text-primary);">Hardware Access Method</h3>
+            <h3 style="margin: 0; color: var(--text-main);">Hardware Access Method</h3>
             <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem;">CPU &rarr; MMU &rarr; Physical RAM</p>
         </div>
     </main>
@@ -359,7 +345,7 @@
                 const physAddr = (frame * pageSize) + dOffset;
                 dom.resPhys.textContent = physAddr;
                 dom.resForm.textContent = `(Frame ${frame} × ${pageSize}) + ${dOffset}`;
-                dom.resBox.style.backgroundColor = 'var(--color-accent-primary)';
+                dom.resBox.style.backgroundColor = 'var(--accent-camel)';
             } else {
                 dom.resPhys.textContent = "PAGE FAULT";
                 dom.resForm.textContent = "Page not loaded in RAM";
@@ -409,9 +395,9 @@
             }
 
             // CPU, MMU, RAM
-            const cpu = createBlock(-4, 0x111111); // Dark Gray
-            const mmu = createBlock(0, 0x222222);  // Lighter Gray
-            const ram = createBlock(4, 0x111111);  // Dark Gray
+            const cpu = createBlock(-4, 0x444444); // Dark Gray
+            const mmu = createBlock(0, 0x444444);  // Lighter Gray
+            const ram = createBlock(4, 0x444444);  // Dark Gray
             scene.add(cpu, mmu, ram);
 
             // Particles (Instanced Mesh)
@@ -430,8 +416,8 @@
                 });
             }
 
-            const colorLogical = new THREE.Color(0x00f0ff); // Neon Blue
-            const colorPhysical = new THREE.Color(0x0090ff); // Deep Neon Blue
+            const colorLogical = new THREE.Color(0xfacc15); // Neon Blue
+            const colorPhysical = new THREE.Color(0xeab308); // Deep Neon Blue
 
             function animate() {
                 requestAnimationFrame(animate);

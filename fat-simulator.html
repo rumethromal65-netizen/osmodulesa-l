@@ -3,77 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAT Directory & Space Simulator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>FAT Simulator | OS Visualizer</title>
+    <link rel="stylesheet" href="theme.css">
     <style>
-        :root {
-            /* Desert Minimalist Theme */
-            --bg-sand: #F7F5F0;
-            --bg-sand-dark: #EAE6DF;
-            --text-charcoal: #333638;
-            --accent-terracotta: #D9735A;
-            --accent-terracotta-hover: #C56149;
-            --accent-gold: #E8A861;
-            --card-bg: #FFFFFF;
-            --border-light: #DCD8D0;
-            --success-green: #70995D;
-            --error-red: #C45557;
-            --font-main: 'Outfit', sans-serif;
-            --shadow-subtle: 0 4px 12px rgba(0,0,0,0.03);
-            --shadow-hover: 0 8px 24px rgba(0,0,0,0.06);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: var(--font-main);
-            background-color: var(--bg-sand);
-            color: var(--text-charcoal);
-            line-height: 1.6;
-            padding: 3rem 2rem;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 760px;
-            width: 100%;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 3.5rem;
-        }
-
-        h1 {
-            font-weight: 700;
-            font-size: 2.8rem;
-            margin-bottom: 0.5rem;
-            color: var(--text-charcoal);
-            letter-spacing: -0.5px;
-        }
-
-        p.subtitle {
-            font-size: 1.15rem;
-            color: #666;
-            font-weight: 300;
-        }
-
-        /* Phases Container */
+        /* ── Phase Section ──────────────────────────── */
         .phase-section {
-            background-color: var(--card-bg);
-            border-radius: 16px;
-            padding: 2.5rem;
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow-subtle);
-            border: 1px solid var(--border-light);
-            transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.3s;
-            opacity: 0.4;
+            background: rgba(19, 19, 26, 0.75);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--border-lo);
+            border-radius: var(--radius-lg);
+            padding: 2rem 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--card-shadow);
+            transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.3s, box-shadow 0.3s;
+            opacity: 0.35;
             pointer-events: none;
             transform: scale(0.98);
         }
@@ -82,447 +26,390 @@
             opacity: 1;
             pointer-events: auto;
             transform: scale(1);
-            box-shadow: var(--shadow-hover);
-            border-left: 6px solid var(--accent-terracotta);
-        }
-        
-        .phase-section.completed {
-            opacity: 0.8;
-            pointer-events: none;
-            transform: scale(1);
-            border-left: 6px solid var(--success-green);
+            border-color: var(--border-mid);
+            box-shadow: var(--hover-shadow);
+            border-left: 4px solid var(--yellow);
         }
 
-        h2 {
-            font-size: 1.5rem;
-            margin-bottom: 1.2rem;
-            font-weight: 600;
+        .phase-section.completed {
+            opacity: 0.65;
+            pointer-events: none;
+            transform: scale(1);
+            border-left: 4px solid #22c55e;
+        }
+
+        /* ── Phase Header ───────────────────────────── */
+        .phase-header {
             display: flex;
             align-items: center;
-            gap: 12px;
-            color: var(--text-charcoal);
+            gap: 0.75rem;
+            margin-bottom: 1rem;
         }
 
         .phase-badge {
-            background-color: var(--bg-sand-dark);
-            color: var(--text-charcoal);
-            padding: 0.25rem 0.8rem;
+            background: var(--yellow-soft);
+            color: var(--yellow);
+            border: 1px solid var(--border-mid);
+            padding: 0.2rem 0.75rem;
             border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
+            font-size: 0.78rem;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.06em;
+            white-space: nowrap;
         }
 
-        p.instruction {
-            font-size: 1.05rem;
-            color: #555;
-            margin-bottom: 1.5rem;
+        .phase-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-hi);
         }
 
-        /* Phase 1: Directory */
+        .instruction {
+            font-size: 0.95rem;
+            color: var(--text-lo);
+            margin-bottom: 1.25rem;
+            line-height: 1.6;
+        }
+
+        .instruction strong { color: var(--text-mid); }
+
+        /* ── Directory Card ─────────────────────────── */
         .directory-card {
-            background-color: var(--bg-sand);
-            border: 2px dashed var(--border-light);
-            border-radius: 12px;
+            background: var(--bg-level3);
+            border: 2px dashed var(--border-lo);
+            border-radius: var(--radius-md);
             padding: 2rem;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 1rem;
             position: relative;
             overflow: hidden;
         }
 
         .directory-card:hover {
-            border-color: var(--accent-terracotta);
-            background-color: var(--bg-sand-dark);
+            border-color: var(--border-hi);
+            background: var(--yellow-mist);
         }
 
         .directory-card.revealed {
             border-style: solid;
-            border-color: var(--accent-terracotta);
-            background-color: rgba(217, 115, 90, 0.05);
+            border-color: var(--border-mid);
+            background: var(--yellow-mist);
             cursor: default;
         }
 
         .file-info {
-            font-size: 1.4rem;
-            font-weight: 600;
+            font-size: 1.3rem;
+            font-weight: 700;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 0.6rem;
+            color: var(--text-hi);
         }
-        
+
+        .hint-text {
+            font-size: 0.88rem;
+            color: var(--text-lo);
+            margin-top: 0.6rem;
+            font-style: italic;
+        }
+
         .hidden-block {
-            margin-top: 1.2rem;
-            font-size: 1.6rem;
+            margin-top: 1rem;
+            font-size: 1.4rem;
             font-weight: 700;
-            color: var(--accent-terracotta);
+            color: var(--yellow);
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(8px);
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        
+
         .hidden-block.show {
             opacity: 1;
             transform: translateY(0);
         }
-        
-        .hint-text {
-            font-size: 0.95rem;
-            color: #777;
-            margin-top: 0.8rem;
-            font-style: italic;
-        }
 
         .explicit-highlight {
             display: inline-block;
-            background-color: var(--accent-gold);
-            color: #fff;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: 600;
+            background: var(--grad-btn);
+            color: #000;
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-weight: 800;
         }
 
-        /* Phase 2: FAT Table */
+        /* ── FAT Table Grid ─────────────────────────── */
         .fat-table-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: 1.2rem;
-            margin-top: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 0.85rem;
+            margin-top: 1.25rem;
         }
 
         .fat-row {
-            background-color: var(--bg-sand);
-            border: 2px solid var(--border-light);
-            border-radius: 10px;
-            padding: 1.2rem;
+            background: var(--bg-level3);
+            border: 1.5px solid var(--border-lo);
+            border-radius: var(--radius-md);
+            padding: 1rem 0.75rem;
             text-align: center;
             cursor: pointer;
-            transition: all 0.25s ease;
-            position: relative;
+            transition: all 0.22s ease;
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: 0.4rem;
         }
 
-        .fat-row:hover:not(.disabled) {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-hover);
-            border-color: var(--accent-gold);
+        .fat-row:hover:not(.disabled):not(.visited) {
+            transform: translateY(-2px);
+            border-color: var(--border-mid);
+            box-shadow: 0 4px 16px rgba(250,204,21,0.15);
         }
 
-        .fat-row.disabled {
-            cursor: not-allowed;
-        }
+        .fat-row.disabled { cursor: not-allowed; opacity: 0.6; }
 
-        /* Highlighting the active block in the chain */
         .fat-row.active-highlight {
-            border: 2px solid var(--accent-terracotta);
-            background-color: #fff;
-            box-shadow: var(--shadow-hover);
+            border: 2px solid var(--yellow);
+            background: var(--yellow-soft);
+            box-shadow: 0 0 18px var(--yellow-glow);
             transform: scale(1.05);
             z-index: 2;
         }
 
-        /* Blocks already traced */
         .fat-row.visited {
-            background-color: var(--bg-sand-dark);
-            border-color: var(--border-light);
-            color: #888;
-            transform: scale(0.98);
-        }
-        
-        .fat-row.visited .fat-pointer {
-            color: #888;
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(255,255,255,0.05);
+            opacity: 0.45;
+            transform: scale(0.97);
         }
 
         .fat-block {
-            font-size: 0.9rem;
-            color: #666;
+            font-size: 0.78rem;
+            color: var(--text-lo);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            font-weight: 500;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
         }
 
         .fat-pointer {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-charcoal);
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-hi);
+            font-family: 'JetBrains Mono', monospace;
         }
 
+        .fat-row.active-highlight .fat-pointer { color: var(--yellow); }
+
+        /* ── EOF Message ────────────────────────────── */
         .eof-message {
-            margin-top: 2rem;
-            padding: 1.2rem;
-            background-color: rgba(112, 153, 93, 0.1);
-            color: var(--success-green);
-            border-radius: 10px;
+            margin-top: 1.5rem;
+            padding: 1rem 1.25rem;
+            background: rgba(34, 197, 94, 0.08);
+            color: #22c55e;
+            border-radius: var(--radius-md);
             text-align: center;
-            font-weight: 600;
-            font-size: 1.1rem;
+            font-weight: 700;
+            font-size: 1rem;
             display: none;
-            border: 1px solid rgba(112, 153, 93, 0.3);
-            animation: fadeIn 0.5s ease;
+            border: 1px solid rgba(34, 197, 94, 0.25);
+            animation: fadeInUp 0.4s ease;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Phase 3: Calculator */
+        /* ── Calculator ─────────────────────────────── */
         .calculator-area {
             display: flex;
             flex-direction: column;
-            gap: 1.2rem;
+            gap: 1rem;
         }
 
         .calc-question {
-            font-size: 1.15rem;
-            font-weight: 500;
+            font-size: 1rem;
+            color: var(--text-mid);
+            line-height: 1.6;
         }
 
         .input-group {
             display: flex;
-            gap: 1rem;
+            gap: 0.75rem;
             align-items: center;
+            flex-wrap: wrap;
         }
 
-        input[type="number"] {
-            padding: 0.8rem 1.2rem;
-            border: 2px solid var(--border-light);
-            border-radius: 8px;
-            font-size: 1.2rem;
-            font-family: var(--font-main);
-            width: 160px;
-            outline: none;
-            transition: all 0.2s;
-            background-color: var(--bg-sand);
-        }
-
-        input[type="number"]:focus {
-            border-color: var(--accent-terracotta);
-            background-color: #fff;
-            box-shadow: 0 0 0 4px rgba(217, 115, 90, 0.1);
-        }
-
-        button {
-            background-color: var(--accent-terracotta);
-            color: white;
-            border: none;
-            padding: 0.85rem 1.8rem;
-            border-radius: 8px;
-            font-size: 1.05rem;
-            font-family: var(--font-main);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: var(--shadow-subtle);
-        }
-
-        button:hover:not(:disabled) {
-            background-color: var(--accent-terracotta-hover);
-            transform: translateY(-1px);
-        }
-        
-        button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-            box-shadow: none;
+        .input-group input {
+            width: 150px;
+            font-size: 1.1rem;
+            font-family: 'JetBrains Mono', monospace;
         }
 
         .feedback {
-            padding: 1.2rem;
-            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius-md);
             margin-top: 0.5rem;
             display: none;
-            font-size: 1.05rem;
-            animation: fadeIn 0.3s ease;
+            font-size: 0.95rem;
+            animation: fadeInUp 0.3s ease;
         }
 
         .feedback.success {
             display: block;
-            background-color: rgba(112, 153, 93, 0.1);
-            color: var(--success-green);
-            border: 1px solid rgba(112, 153, 93, 0.3);
+            background: rgba(34, 197, 94, 0.08);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.25);
         }
 
         .feedback.error {
             display: block;
-            background-color: rgba(196, 85, 87, 0.08);
-            color: var(--error-red);
-            border: 1px solid rgba(196, 85, 87, 0.2);
-        }
-        
-        .reset-btn {
-            display: block;
-            margin: 3rem auto;
-            background-color: transparent;
-            color: var(--text-charcoal);
-            border: 2px solid var(--border-light);
-        }
-        .reset-btn:hover {
-            background-color: var(--bg-sand-dark);
-            border-color: var(--text-charcoal);
-        }
-        
-        .icon {
-            font-size: 1.3em;
+            background: rgba(239, 68, 68, 0.07);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.2);
         }
 
-        .back-link {
-            position: absolute;
-            top: 1.5rem;
-            left: 1.5rem;
-            color: var(--text-charcoal);
-            text-decoration: none;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            opacity: 0.6;
-            transition: all 0.2s;
+        /* ── Shake Anim ─────────────────────────────── */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); border-color: #f87171; }
+            50% { transform: translateX(5px); border-color: #f87171; }
+            75% { transform: translateX(-5px); border-color: #f87171; }
         }
 
-        .back-link:hover {
-            opacity: 1;
-            transform: translateX(-3px);
-        }
-
-        .back-link svg {
-            width: 20px;
-            height: 20px;
+        /* ── EOF highlight in instructions ─────────── */
+        .eof-tag {
+            display: inline-block;
+            background: rgba(239,68,68,0.12);
+            color: #f87171;
+            font-weight: 800;
+            padding: 0 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(239,68,68,0.25);
         }
     </style>
 </head>
 <body>
-    <a href="index.html" class="back-link">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-        Back to OS Visualizer
-    </a>
-    <div class="container">
-        <header>
-            <h1>FAT Simulator</h1>
-            <p class="subtitle">Understand directory entries and calculate allocated disk space.</p>
-        </header>
 
-        <!-- Phase 1 -->
+    <!-- Top Bar -->
+    <nav class="top-bar">
+        <a href="index.html" class="back-home-btn">← Back to Home</a>
+    </nav>
+
+    <main class="flex-grow flex flex-col animate-fade-in" style="padding:2rem;max-width:820px;margin:0 auto;width:100%;gap:0">
+
+        <!-- Page Header -->
+        <div class="section-header" style="margin-bottom:1.5rem">
+            <h1>FAT Simulator</h1>
+            <p>Understand directory entries, file block chaining, and calculate allocated disk space.</p>
+        </div>
+
+        <!-- Phase 1: Directory Entry -->
         <section id="phase1" class="phase-section active">
-            <h2><span class="phase-badge">Phase 1</span> Directory Entry Discovery</h2>
+            <div class="phase-header">
+                <span class="phase-badge">Phase 1</span>
+                <span class="phase-title">Directory Entry Discovery</span>
+            </div>
             <p class="instruction">To read a file, the OS first looks it up in the directory to find its starting point.<br>
             <strong>Click the Directory Registry card below</strong> to reveal the file's first block.</p>
-            
+
             <div id="dir-card" class="directory-card" onclick="revealStartBlock()">
-                <div class="file-info"><span class="icon">📄</span> dataset.csv</div>
-                <div class="hint-text">Click to read directory entry</div>
+                <div class="file-info">📄 dataset.csv</div>
+                <div class="hint-text">Click to read directory entry →</div>
                 <div id="start-block-display" class="hidden-block">
                     First Block Number = <span class="explicit-highlight" id="first-block-num"></span>
                 </div>
             </div>
         </section>
 
-        <!-- Phase 2 -->
+        <!-- Phase 2: FAT Chain Tracing -->
         <section id="phase2" class="phase-section">
-            <h2><span class="phase-badge">Phase 2</span> Tracing the Chain</h2>
-            <p class="instruction">The File Allocation Table (FAT) stores pointers to the next block in the file. <br>
-            The starting block is highlighted. <strong>Find and click the next block indicated by its pointer</strong> until you reach <span style="font-weight: 700; color: var(--error-red)">-1</span> (End of File).</p>
-            
-            <div id="fat-table" class="fat-table-container">
-                <!-- Dynamically generated -->
+            <div class="phase-header">
+                <span class="phase-badge">Phase 2</span>
+                <span class="phase-title">Tracing the FAT Chain</span>
             </div>
-            
+            <p class="instruction">
+                The File Allocation Table (FAT) stores pointers to the next block in the file.<br>
+                The starting block is highlighted. <strong>Click the next block indicated by its pointer</strong> until you reach <span class="eof-tag">-1</span> (End of File).
+            </p>
+
+            <div id="fat-table" class="fat-table-container"></div>
+
             <div id="eof-message" class="eof-message">
-                🎉 End of File (EOF) Reached! You successfully traced the entire file sequence.
+                🎉 End of File (EOF) Reached! You successfully traced the entire file chain.
             </div>
         </section>
 
-        <!-- Phase 3 -->
+        <!-- Phase 3: Calculator -->
         <section id="phase3" class="phase-section">
-            <h2><span class="phase-badge">Phase 3</span> Space Allocation Calculator</h2>
+            <div class="phase-header">
+                <span class="phase-badge">Phase 3</span>
+                <span class="phase-title">Space Allocation Calculator</span>
+            </div>
             <div class="calculator-area">
                 <p class="calc-question" id="calc-prompt">The file spans X blocks. If 1 block = 4KB, what is the total allocated space in KB?</p>
                 <div class="input-group">
-                    <input type="number" id="calc-input" placeholder="Total KB" />
-                    <button id="calc-submit" onclick="checkCalculation()">Submit</button>
+                    <input type="number" id="calc-input" placeholder="Answer in KB" />
+                    <button class="btn-primary" id="calc-submit" onclick="checkCalculation()">Submit Answer</button>
                 </div>
                 <div id="calc-feedback" class="feedback"></div>
             </div>
         </section>
-        
-        <button class="reset-btn" onclick="initSimulation()">Restart Simulator</button>
-    </div>
+
+        <!-- Reset -->
+        <div style="text-align:center;margin-top:1.5rem">
+            <button class="btn-ghost" onclick="initSimulation()">↺ Restart Simulator</button>
+        </div>
+    </main>
 
     <script>
-        // State variables
         let fat = {};
         let startBlock = 0;
         let blockCount = 0;
         let currentTargetBlock = 0;
         let currentActiveBlock = 0;
         const BLOCK_SIZE_KB = 4;
-        
+
         function initSimulation() {
-            // Reset UI
             document.getElementById('phase1').className = 'phase-section active';
             document.getElementById('phase2').className = 'phase-section';
             document.getElementById('phase3').className = 'phase-section';
-            
+
             const dirCard = document.getElementById('dir-card');
             dirCard.classList.remove('revealed');
             dirCard.querySelector('.hint-text').style.display = 'block';
             document.getElementById('start-block-display').classList.remove('show');
-            
+
             document.getElementById('fat-table').innerHTML = '';
             document.getElementById('eof-message').style.display = 'none';
-            
+
             document.getElementById('calc-input').value = '';
             document.getElementById('calc-input').disabled = false;
             document.getElementById('calc-submit').disabled = false;
             document.getElementById('calc-feedback').className = 'feedback';
-            document.getElementById('calc-feedback').style.display = 'none';
-            
+
             generateFATState();
         }
 
         function generateFATState() {
-            // Randomly decide if file is 3 or 4 blocks long
-            blockCount = Math.floor(Math.random() * 2) + 3; // 3 or 4
-            
-            // Pick random blocks between 100 and 115 to keep the table scannable
+            blockCount = Math.floor(Math.random() * 2) + 3;
+
             let availableBlocks = [];
-            for (let i = 100; i <= 111; i++) {
-                availableBlocks.push(i);
-            }
-            
-            // Shuffle available blocks
+            for (let i = 100; i <= 111; i++) availableBlocks.push(i);
             availableBlocks.sort(() => 0.5 - Math.random());
-            
-            // Select our file sequence blocks
+
             const fileBlocks = availableBlocks.slice(0, blockCount);
             startBlock = fileBlocks[0];
-            
+
             fat = {};
-            // Generate some random noise in the FAT table for the remaining blocks
             const noiseBlocks = availableBlocks.slice(blockCount, blockCount + 6);
             noiseBlocks.forEach(b => {
-                // Point noise to some random block
                 fat[b] = availableBlocks[Math.floor(Math.random() * availableBlocks.length)];
             });
-            
-            // Link the file blocks sequentially
+
             for (let i = 0; i < blockCount; i++) {
-                if (i === blockCount - 1) {
-                    fat[fileBlocks[i]] = -1; // End of File
-                } else {
-                    fat[fileBlocks[i]] = fileBlocks[i + 1];
-                }
+                fat[fileBlocks[i]] = (i === blockCount - 1) ? -1 : fileBlocks[i + 1];
             }
-            
-            // Generate FAT table array for UI (mixing file blocks and noise blocks)
+
             let displayBlocks = [...fileBlocks, ...noiseBlocks].sort((a, b) => a - b);
-            
+
             const fatTable = document.getElementById('fat-table');
             displayBlocks.forEach(block => {
                 const row = document.createElement('div');
@@ -535,132 +422,100 @@
                 row.onclick = () => handleBlockClick(block);
                 fatTable.appendChild(row);
             });
-            
+
             document.getElementById('first-block-num').textContent = startBlock;
         }
 
         function revealStartBlock() {
             const card = document.getElementById('dir-card');
             if (card.classList.contains('revealed')) return;
-            
+
             card.classList.add('revealed');
             card.querySelector('.hint-text').style.display = 'none';
             document.getElementById('start-block-display').classList.add('show');
-            
-            // Smooth transition to Phase 2
+
             setTimeout(() => {
                 document.getElementById('phase1').classList.add('completed');
                 document.getElementById('phase1').classList.remove('active');
                 document.getElementById('phase2').classList.add('active');
-                
-                // Highlight starting block in FAT table
+
                 const startRow = document.getElementById(`block-${startBlock}`);
                 startRow.classList.remove('disabled');
                 startRow.classList.add('active-highlight');
-                
+
                 currentActiveBlock = startBlock;
                 currentTargetBlock = fat[startBlock];
-                
-                // Enable all blocks for clicking, but we only accept the correct one
-                const allRows = document.querySelectorAll('.fat-row');
-                allRows.forEach(r => {
-                    r.classList.remove('disabled');
-                });
-                
-            }, 1000);
+
+                document.querySelectorAll('.fat-row').forEach(r => r.classList.remove('disabled'));
+            }, 900);
         }
-        
+
         function handleBlockClick(block) {
             const phase2 = document.getElementById('phase2');
             if (!phase2.classList.contains('active')) return;
-            
-            // Ignore clicks on already visited blocks or the currently active block
+
             const row = document.getElementById(`block-${block}`);
             if (row.classList.contains('visited') || block === currentActiveBlock) return;
-            
-            // Verify if user clicked the correct next block in the chain
+
             if (block !== currentTargetBlock) {
-                // Visual feedback for wrong click
                 row.style.animation = 'shake 0.4s';
                 setTimeout(() => row.style.animation = '', 400);
                 return;
             }
-            
-            // Correct click! Mark previous active block as visited
+
             const prevRow = document.getElementById(`block-${currentActiveBlock}`);
             prevRow.classList.remove('active-highlight');
             prevRow.classList.add('visited');
-            
-            // Set new active block
+
             currentActiveBlock = block;
             row.classList.add('active-highlight');
-            
+
             const pointer = fat[block];
-            
+
             if (pointer === -1) {
-                // End of File Reached
                 document.getElementById('eof-message').style.display = 'block';
                 setTimeout(() => {
                     document.getElementById('phase2').classList.add('completed');
                     document.getElementById('phase2').classList.remove('active');
                     startPhase3();
-                }, 1800);
+                }, 1600);
             } else {
-                // Update target to next pointer
                 currentTargetBlock = pointer;
             }
         }
-        
+
         function startPhase3() {
             document.getElementById('phase3').classList.add('active');
-            document.getElementById('calc-prompt').innerHTML = 
-                `The file spans <strong>${blockCount} blocks</strong>. If 1 block = <strong>${BLOCK_SIZE_KB}KB</strong>, what is the total allocated space in KB?`;
-            
+            document.getElementById('calc-prompt').innerHTML =
+                `The file spans <strong style="color:var(--yellow)">${blockCount} blocks</strong>. If 1 block = <strong style="color:var(--yellow)">${BLOCK_SIZE_KB}KB</strong>, what is the total allocated space in KB?`;
             document.getElementById('calc-input').focus();
         }
-        
+
         function checkCalculation() {
             const input = document.getElementById('calc-input').value;
             const feedback = document.getElementById('calc-feedback');
-            
+
             if (!input) {
                 feedback.className = 'feedback error';
                 feedback.innerHTML = '⚠️ Please enter a number.';
-                feedback.style.display = 'block';
                 return;
             }
-            
+
             const parsed = parseInt(input);
             const expected = blockCount * BLOCK_SIZE_KB;
-            
+
             if (parsed === expected) {
                 feedback.className = 'feedback success';
                 feedback.innerHTML = `<strong>✨ Correct!</strong> ${blockCount} blocks × ${BLOCK_SIZE_KB}KB = ${expected}KB total allocated space.`;
-                feedback.style.display = 'block';
                 document.getElementById('calc-input').disabled = true;
                 document.getElementById('calc-submit').disabled = true;
                 document.getElementById('phase3').classList.add('completed');
             } else {
                 feedback.className = 'feedback error';
-                feedback.innerHTML = `<strong>Not quite.</strong><br>Mathematical breakdown: The file spans ${blockCount} blocks. Each block is ${BLOCK_SIZE_KB}KB. Try multiplying ${blockCount} by ${BLOCK_SIZE_KB}.`;
-                feedback.style.display = 'block';
+                feedback.innerHTML = `<strong>Not quite.</strong> The file spans ${blockCount} blocks × ${BLOCK_SIZE_KB}KB each. Try <strong>${blockCount} × ${BLOCK_SIZE_KB}</strong>.`;
             }
         }
-        
-        // Add shake animation keyframes dynamically
-        const style = document.createElement('style');
-        style.innerHTML = `
-            @keyframes shake {
-                0% { transform: translateX(0); }
-                25% { transform: translateX(-5px); border-color: var(--error-red); }
-                50% { transform: translateX(5px); border-color: var(--error-red); }
-                75% { transform: translateX(-5px); border-color: var(--error-red); }
-                100% { transform: translateX(0); }
-            }
-        `;
-        document.head.appendChild(style);
-        
-        // Initialize on load
+
         window.onload = initSimulation;
     </script>
 </body>

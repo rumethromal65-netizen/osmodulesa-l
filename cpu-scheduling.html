@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CPU Scheduling Simulator | OS Visualizer</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="theme.css">
     <style>
         .nav-links { display: none; }
         @media (min-width: 1024px) {
@@ -13,57 +13,46 @@
         }
     </style>
 </head>
-<body class="bg-[#FDFBF7] text-[#2C2A29]">
+<body class="">
     
-    <nav class="navbar">
-        <a href="index.html" class="nav-logo shrink-0">
-            <svg class="w-6 h-6 text-[#D4A373]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-            OS Visualizer
-        </a>
-        <div class="nav-links gap-2">
-            <a href="cpu-scheduling.html" class="nav-item active">CPU</a>
-            <a href="memory-management.html" class="nav-item">MMU</a>
-            <a href="virtual-memory.html" class="nav-item">Swapping</a>
-            <a href="paging.html" class="nav-item">Paging</a>
-            <a href="adv-states.html" class="nav-item">States</a>
-            <a href="context-switching.html" class="nav-item">Context</a>
-            <a href="boot-process.html" class="nav-item">Boot</a>
-        </div>
+        <!-- Top Bar -->
+    <nav class="top-bar">
+        <a href="index.html" class="back-home-btn">← Back to Home</a>
     </nav>
 
     <main class="flex-grow flex flex-col p-6 max-w-7xl mx-auto w-full animate-fade-in">
         <header class="mb-8">
             <h1 class="text-4xl mb-2">CPU Scheduling Simulator</h1>
-            <p class="text-[#6B635E]">Simulate how the Short-Term Scheduler selects and dispatches processes from the Ready Queue to the CPU.</p>
+            <p class="text-[var(--text-lo)]">Simulate how the Short-Term Scheduler selects and dispatches processes from the Ready Queue to the CPU.</p>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             <!-- Input Panel -->
             <div class="glass-panel p-6 lg:col-span-1 flex flex-col gap-4">
-                <h2 class="text-xl border-b border-[#E6DFD3] pb-2">Add Process</h2>
+                <h2 class="text-xl border-b border-[var(--sand-dark)] pb-2">Add Process</h2>
                 <form id="add-process-form" class="flex flex-col gap-4">
                     <div>
-                        <label class="block text-sm font-semibold mb-1 text-[#6B635E]">Arrival Time</label>
+                        <label class="block text-sm font-semibold mb-1 text-[var(--text-lo)]">Arrival Time</label>
                         <input type="number" id="at-input" min="0" value="0" class="w-full" required>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold mb-1 text-[#6B635E]">Burst Time</label>
+                        <label class="block text-sm font-semibold mb-1 text-[var(--text-lo)]">Burst Time</label>
                         <input type="number" id="bt-input" min="1" value="5" class="w-full" required>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold mb-1 text-[#6B635E]">Priority (Lower # = Higher Prio)</label>
+                        <label class="block text-sm font-semibold mb-1 text-[var(--text-lo)]">Priority (Lower # = Higher Prio)</label>
                         <input type="number" id="prio-input" min="1" value="1" class="w-full">
                     </div>
                     <button type="submit" class="btn-primary mt-2">Add to Queue</button>
-                    <button type="button" id="reset-btn" class="btn-accent mt-2 bg-red-500 border-red-500 hover:text-red-500">Reset Simulator</button>
+                    <button type="button" id="reset-btn" class="btn-ghost mt-2">Reset Simulator</button>
                 </form>
             </div>
 
             <!-- Configuration & Processes List -->
             <div class="glass-panel p-6 lg:col-span-2 flex flex-col gap-4">
-                <div class="flex flex-col md:flex-row gap-4 justify-between items-end border-b border-[#E6DFD3] pb-4">
+                <div class="flex flex-col md:flex-row gap-4 justify-between items-end border-b border-[var(--sand-dark)] pb-4">
                     <div class="flex-grow w-full">
-                        <label class="block text-sm font-semibold mb-1 text-[#6B635E]">Algorithm Policy</label>
+                        <label class="block text-sm font-semibold mb-1 text-[var(--text-lo)]">Algorithm Policy</label>
                         <select id="algo-select" class="w-full">
                             <option value="FCFS">First-Come-First-Serve (FCFS)</option>
                             <option value="SJF-NP">Shortest Job First (Non-Preemptive)</option>
@@ -74,16 +63,16 @@
                         </select>
                     </div>
                     <div id="tq-container" class="flex-grow w-full hidden opacity-50 transition-opacity">
-                        <label class="block text-sm font-semibold mb-1 text-[#6B635E]">Time Quantum: <span id="tq-val">2</span></label>
+                        <label class="block text-sm font-semibold mb-1 text-[var(--text-lo)]">Time Quantum: <span id="tq-val">2</span></label>
                         <input type="range" id="tq-input" min="1" max="10" value="2">
                     </div>
-                    <button id="simulate-btn" class="btn-accent whitespace-nowrap bg-[#006D77] border-[#006D77] hover:text-[#006D77]">Simulate Execution</button>
+                    <button id="simulate-btn" class="btn-accent whitespace-nowrap bg-[var(--accent-camel)] border-[var(--accent-camel)] hover:text-[var(--accent-camel)]">Simulate Execution</button>
                 </div>
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse" id="process-table">
                         <thead>
-                            <tr class="border-b border-[#E6DFD3] text-[#6B635E]">
+                            <tr class="border-b border-[var(--sand-dark)] text-[var(--text-lo)]">
                                 <th class="py-2">Process</th>
                                 <th class="py-2">AT</th>
                                 <th class="py-2">BT</th>
@@ -94,7 +83,7 @@
                             <!-- Process rows appended here -->
                         </tbody>
                     </table>
-                    <div id="empty-state" class="text-center p-8 text-[#6B635E]">No processes added yet.</div>
+                    <div id="empty-state" class="text-center p-8 text-[var(--text-lo)]">No processes added yet.</div>
                 </div>
             </div>
         </div>
@@ -102,10 +91,10 @@
         <!-- Animation / Gantt Chart -->
         <div class="glass-panel p-6 mb-8 hidden" id="gantt-section">
             <h2 class="text-xl mb-4">Execution Gantt Chart</h2>
-            <div class="relative w-full h-24 bg-white rounded-lg border border-[#E6DFD3] flex items-center overflow-x-auto px-2" id="gantt-container">
+            <div class="relative w-full h-24 bg-[var(--bg-level2)] rounded-lg border border-[var(--sand-dark)] flex items-center overflow-x-auto px-2" id="gantt-container">
                 <!-- Gantt blocks go here -->
             </div>
-            <div class="flex justify-between mt-2 text-sm font-bold text-[#6B635E] mono">
+            <div class="flex justify-between mt-2 text-sm font-bold text-[var(--text-lo)] mono">
                 <span>0</span>
                 <span id="max-time">...</span>
             </div>
@@ -113,11 +102,11 @@
 
         <!-- Metrics -->
         <div class="glass-panel p-6 hidden" id="metrics-section">
-            <h2 class="text-xl mb-4 border-b border-[#E6DFD3] pb-2">Performance Metrics</h2>
+            <h2 class="text-xl mb-4 border-b border-[var(--sand-dark)] pb-2">Performance Metrics</h2>
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse mb-6" id="metrics-table">
                     <thead>
-                        <tr class="border-b border-[#E6DFD3] text-[#6B635E]">
+                        <tr class="border-b border-[var(--sand-dark)] text-[var(--text-lo)]">
                             <th class="py-2">PID</th>
                             <th class="py-2">CT (Completion)</th>
                             <th class="py-2">TAT (Turnaround)</th>
@@ -132,26 +121,26 @@
             </div>
             
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                <div class="bg-[#F5F0E6] p-4 rounded-lg">
-                    <div class="text-sm text-[#6B635E] font-bold">Avg Turnaround</div>
+                <div class="bg-[var(--sand-warm)] p-4 rounded-lg">
+                    <div class="text-sm text-[var(--text-lo)] font-bold">Avg Turnaround</div>
                     <div class="text-2xl mono mt-1" id="avg-tat">0.0</div>
                 </div>
-                <div class="bg-[#F5F0E6] p-4 rounded-lg">
-                    <div class="text-sm text-[#6B635E] font-bold">Avg Waiting</div>
+                <div class="bg-[var(--sand-warm)] p-4 rounded-lg">
+                    <div class="text-sm text-[var(--text-lo)] font-bold">Avg Waiting</div>
                     <div class="text-2xl mono mt-1" id="avg-wt">0.0</div>
                 </div>
-                <div class="bg-[#F5F0E6] p-4 rounded-lg">
-                    <div class="text-sm text-[#6B635E] font-bold">Avg Response</div>
+                <div class="bg-[var(--sand-warm)] p-4 rounded-lg">
+                    <div class="text-sm text-[var(--text-lo)] font-bold">Avg Response</div>
                     <div class="text-2xl mono mt-1" id="avg-rt">0.0</div>
                 </div>
-                <div class="bg-[#F5F0E6] p-4 rounded-lg">
-                    <div class="text-sm text-[#6B635E] font-bold">Throughput</div>
+                <div class="bg-[var(--sand-warm)] p-4 rounded-lg">
+                    <div class="text-sm text-[var(--text-lo)] font-bold">Throughput</div>
                     <div class="text-2xl mono mt-1" id="throughput">0.0</div>
                 </div>
             </div>
         </div>
     </main>
 
-    <script src="js/cpu-scheduling.js"></script>
+    <script src="cpu-scheduling.js"></script>
 </body>
 </html>

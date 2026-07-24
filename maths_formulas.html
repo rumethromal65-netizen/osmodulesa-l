@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maths Formulas Reference</title>
+    <link rel="stylesheet" href="theme.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -49,44 +50,44 @@
         <div class="w-full md:w-72 flex flex-col gap-4">
             <div>
                 <h1 class="text-3xl font-extrabold text-white mb-1 tracking-tight">Maths Formulas</h1>
-                <p class="text-gray-400 mb-6 text-sm font-medium">Quick Reference Guide</p>
+                <p class="text-white/50 mb-6 text-sm font-medium">Quick Reference Guide</p>
             </div>
             
             <nav class="flex flex-col gap-2" id="topic-selector">
-                <button onclick="selectTopic('limits')" id="btn-limits" class="topic-btn active text-left px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 font-semibold text-gray-200 border border-white/10">
+                <button onclick="selectTopic('limits')" id="btn-limits" class="topic-btn active text-left px-5 py-3 rounded-2xl bg-[var(--bg-level2)]/10 hover:bg-[var(--bg-level2)]/20 font-semibold text-white/70 border border-white/10">
                     📉 Limits
                 </button>
-                <button onclick="selectTopic('series')" id="btn-series" class="topic-btn text-left px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 font-semibold text-gray-200 border border-white/10">
+                <button onclick="selectTopic('series')" id="btn-series" class="topic-btn text-left px-5 py-3 rounded-2xl bg-[var(--bg-level2)]/10 hover:bg-[var(--bg-level2)]/20 font-semibold text-white/70 border border-white/10">
                     ➕ Series
                 </button>
-                <button onclick="selectTopic('binomial')" id="btn-binomial" class="topic-btn text-left px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 font-semibold text-gray-200 border border-white/10">
+                <button onclick="selectTopic('binomial')" id="btn-binomial" class="topic-btn text-left px-5 py-3 rounded-2xl bg-[var(--bg-level2)]/10 hover:bg-[var(--bg-level2)]/20 font-semibold text-white/70 border border-white/10">
                     🧮 Binomial Expansion
                 </button>
-                <button onclick="selectTopic('circles')" id="btn-circles" class="topic-btn text-left px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 font-semibold text-gray-200 border border-white/10">
+                <button onclick="selectTopic('circles')" id="btn-circles" class="topic-btn text-left px-5 py-3 rounded-2xl bg-[var(--bg-level2)]/10 hover:bg-[var(--bg-level2)]/20 font-semibold text-white/70 border border-white/10">
                     ⭕ Circles
                 </button>
-                <button onclick="selectTopic('differentiation')" id="btn-differentiation" class="topic-btn text-left px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 font-semibold text-gray-200 border border-white/10">
+                <button onclick="selectTopic('differentiation')" id="btn-differentiation" class="topic-btn text-left px-5 py-3 rounded-2xl bg-[var(--bg-level2)]/10 hover:bg-[var(--bg-level2)]/20 font-semibold text-white/70 border border-white/10">
                     📐 Differentiation
                 </button>
-                <button onclick="selectTopic('integration')" id="btn-integration" class="topic-btn text-left px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 font-semibold text-gray-200 border border-white/10">
+                <button onclick="selectTopic('integration')" id="btn-integration" class="topic-btn text-left px-5 py-3 rounded-2xl bg-[var(--bg-level2)]/10 hover:bg-[var(--bg-level2)]/20 font-semibold text-white/70 border border-white/10">
                     ∫ Integration
                 </button>
             </nav>
         </div>
 
         <!-- Content Area -->
-        <div class="flex-1 bg-white/5 rounded-3xl p-8 border border-white/10 shadow-inner relative overflow-hidden">
+        <div class="flex-1 bg-[var(--bg-level2)]/5 rounded-3xl p-8 border border-white/10 shadow-inner relative overflow-hidden">
             
             <!-- Limits Content -->
             <div id="content-limits" class="topic-content block animate-[fadeIn_0.4s_ease-out]">
                 <h2 class="text-4xl font-bold text-white mb-6 border-b border-white/20 pb-4">Limits</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="formula-box p-5 rounded-2xl">
-                        <h3 class="font-bold text-gray-200 mb-2">Standard Limit</h3>
+                        <h3 class="font-bold text-white/70 mb-2">Standard Limit</h3>
                         <p class="formula-text font-mono text-lg p-3 rounded-xl">lim (x→0) (sin x) / x = 1</p>
                     </div>
                     <div class="formula-box p-5 rounded-2xl">
-                        <h3 class="font-bold text-gray-200 mb-2">Exponential Limit</h3>
+                        <h3 class="font-bold text-white/70 mb-2">Exponential Limit</h3>
                         <p class="formula-text font-mono text-lg p-3 rounded-xl">lim (n→∞) (1 + 1/n)ⁿ = e</p>
                     </div>
                 </div>
@@ -97,11 +98,11 @@
                 <h2 class="text-4xl font-bold text-white mb-6 border-b border-white/20 pb-4">Series</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="formula-box p-5 rounded-2xl">
-                        <h3 class="font-bold text-gray-200 mb-2">Arithmetic Progression (Sum)</h3>
+                        <h3 class="font-bold text-white/70 mb-2">Arithmetic Progression (Sum)</h3>
                         <p class="formula-text font-mono text-lg p-3 rounded-xl">Sₙ = n/2 [2a + (n-1)d]</p>
                     </div>
                     <div class="formula-box p-5 rounded-2xl">
-                        <h3 class="font-bold text-gray-200 mb-2">Geometric Progression (Sum to infinity)</h3>
+                        <h3 class="font-bold text-white/70 mb-2">Geometric Progression (Sum to infinity)</h3>
                         <p class="formula-text font-mono text-lg p-3 rounded-xl">S_∞ = a / (1 - r) , for |r| < 1</p>
                     </div>
                 </div>
@@ -111,11 +112,11 @@
             <div id="content-binomial" class="topic-content hidden">
                 <h2 class="text-4xl font-bold text-white mb-6 border-b border-white/20 pb-4">Binomial Expansion</h2>
                 <div class="formula-box p-6 rounded-2xl">
-                    <h3 class="font-bold text-gray-200 mb-2">General Theorem</h3>
+                    <h3 class="font-bold text-white/70 mb-2">General Theorem</h3>
                     <p class="formula-text font-mono text-lg p-4 rounded-xl overflow-x-auto whitespace-nowrap">
                         (x + y)ⁿ = ⁿC₀ xⁿy⁰ + ⁿC₁ xⁿ⁻¹y¹ + ... + ⁿCₙ x⁰yⁿ
                     </p>
-                    <p class="mt-4 text-sm text-gray-400">Where ⁿCₖ = n! / [k!(n-k)!]</p>
+                    <p class="mt-4 text-sm text-white/50">Where ⁿCₖ = n! / [k!(n-k)!]</p>
                 </div>
             </div>
 
@@ -124,14 +125,14 @@
                 <h2 class="text-4xl font-bold text-white mb-6 border-b border-white/20 pb-4">Circles</h2>
                 <div class="grid grid-cols-1 gap-6">
                     <div class="formula-box p-5 rounded-2xl">
-                        <h3 class="font-bold text-gray-200 mb-2">Standard Equation</h3>
+                        <h3 class="font-bold text-white/70 mb-2">Standard Equation</h3>
                         <p class="formula-text font-mono text-lg p-3 rounded-xl">(x - h)² + (y - k)² = r²</p>
-                        <p class="mt-2 text-sm text-gray-400">Center at (h,k) with radius r</p>
+                        <p class="mt-2 text-sm text-white/50">Center at (h,k) with radius r</p>
                     </div>
                     <div class="formula-box p-5 rounded-2xl">
-                        <h3 class="font-bold text-gray-200 mb-2">General Equation</h3>
+                        <h3 class="font-bold text-white/70 mb-2">General Equation</h3>
                         <p class="formula-text font-mono text-lg p-3 rounded-xl">x² + y² + 2gx + 2fy + c = 0</p>
-                        <p class="mt-2 text-sm text-gray-400">Center at (-g, -f), radius = √(g² + f² - c)</p>
+                        <p class="mt-2 text-sm text-white/50">Center at (-g, -f), radius = √(g² + f² - c)</p>
                     </div>
                 </div>
             </div>
@@ -141,15 +142,15 @@
                 <h2 class="text-4xl font-bold text-white mb-6 border-b border-white/20 pb-4">Differentiation</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="formula-box p-5 rounded-2xl">
-                        <h3 class="font-bold text-gray-200 mb-2">Power Rule</h3>
+                        <h3 class="font-bold text-white/70 mb-2">Power Rule</h3>
                         <p class="formula-text font-mono text-lg p-3 rounded-xl">d/dx (xⁿ) = n·xⁿ⁻¹</p>
                     </div>
                     <div class="formula-box p-5 rounded-2xl">
-                        <h3 class="font-bold text-gray-200 mb-2">Product Rule</h3>
+                        <h3 class="font-bold text-white/70 mb-2">Product Rule</h3>
                         <p class="formula-text font-mono text-lg p-3 rounded-xl">d/dx (uv) = u(dv/dx) + v(du/dx)</p>
                     </div>
                     <div class="formula-box p-5 rounded-2xl md:col-span-2">
-                        <h3 class="font-bold text-gray-200 mb-2">Chain Rule</h3>
+                        <h3 class="font-bold text-white/70 mb-2">Chain Rule</h3>
                         <p class="formula-text font-mono text-lg p-3 rounded-xl">dy/dx = (dy/du) · (du/dx)</p>
                     </div>
                 </div>
@@ -160,11 +161,11 @@
                 <h2 class="text-4xl font-bold text-white mb-6 border-b border-white/20 pb-4">Integration</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="formula-box p-5 rounded-2xl">
-                        <h3 class="font-bold text-gray-200 mb-2">Power Rule</h3>
+                        <h3 class="font-bold text-white/70 mb-2">Power Rule</h3>
                         <p class="formula-text font-mono text-lg p-3 rounded-xl">∫ xⁿ dx = (xⁿ⁺¹) / (n+1) + C</p>
                     </div>
                     <div class="formula-box p-5 rounded-2xl">
-                        <h3 class="font-bold text-gray-200 mb-2">Integration by Parts</h3>
+                        <h3 class="font-bold text-white/70 mb-2">Integration by Parts</h3>
                         <p class="formula-text font-mono text-lg p-3 rounded-xl overflow-x-auto whitespace-nowrap">∫ u dv = uv - ∫ v du</p>
                     </div>
                 </div>
